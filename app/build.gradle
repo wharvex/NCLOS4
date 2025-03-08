@@ -41,3 +41,7 @@ tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+tasks.named('run') {
+    standardInput = System.in
+}
