@@ -1,9 +1,7 @@
 package com.wharvex.nclos;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -12,36 +10,37 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+/**
+ * Creates a separate Swing window to display log messages.
+ */
 public class SepWinOutWriter {
-    private Logger logger;
+    private final Logger logger;
     private static SepWinOutWriter instance;
 
     private SepWinOutWriter() {
-        JFrame frame = new JFrame("Log Window");
-        JTextArea textArea = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(textArea);
-
+        // Set up the Swing window.
+        var frame = new JFrame("Log Window");
+        var textArea = new JTextArea();
+        var scrollPane = new JScrollPane(textArea);
         frame.add(scrollPane, BorderLayout.CENTER);
-        frame.setSize(400, 400);
+        frame.setSize(800, 400);
 
+        // Create the logger.
         logger = Logger.getLogger("MyLog");
+
+        // We don't want to print to the console.
         logger.setUseParentHandlers(false);
 
-        Handler handler = new StreamHandler(new OutputStream() {
+        var handler = new StreamHandler(new OutputStream() {
             @Override
-            public void write(int b) throws IOException {
+            public void write(int b) {
                 textArea.append(String.valueOf((char) b));
                 textArea.setCaretPosition(textArea.getDocument().getLength());
             }
         }, new SimpleFormatter());
 
         logger.addHandler(handler);
-
         frame.setVisible(true);
-
-        logger.info("Application started.");
-        logger.warning("Something might be wrong.");
-        logger.severe("An error occurred!");
     }
 
     public static SepWinOutWriter getInstance() {
@@ -54,5 +53,4 @@ public class SepWinOutWriter {
     public Logger getLogger() {
         return logger;
     }
-
 }
