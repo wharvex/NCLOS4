@@ -3,97 +3,68 @@ package com.wharvex.nclos;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 public class OutputHelper {
-    public static BufferedWriter outputWriter;
+    private static OutputHelper instance;
+    private final Logger debugLogger;
+    private final Logger mainOutputLogger;
 
-    // StackWalker requires Java 9+.
-    private static StackWalker.StackFrame getFrame() {
-        return StackWalker.getInstance().walk(
-                stream -> stream.skip(2).findFirst().orElseThrow(() -> new RuntimeException("No such stack frame")));
-    }
+    private OutputHelper() {
+        // Set the loggers and log file paths.
+        debugLogger = Logger.getLogger("DebugLog");
+        mainOutputLogger = Logger.getLogger("MainOutputLog");
+        String debugLogFilePath = System.getProperty("java.io.tmpdir") + "nclosDebug.log";
+        String mainOutputLogFilePath = System.getProperty("java.io.tmpdir") + "nclosMainOutput.log";
 
-    public static void debugPrint(String baseStr) {
-        var frame = getFrame();
-        String printStr = Thread.currentThread().getName() + " in " + frame.getClassName() + "." + frame.getMethodName()
-                + ": " + baseStr;
-        // System.out.println(printStr);
-        writeToFile(printStr);
-    }
+        // CONFIGURE THE LOGGERS.
 
-    public static void debugPrint(DebugOutputType dot) {
-        var frame = getFrame();
-        String printStr = Thread.currentThread().getName() + " in " + frame.getClassName() + "." + frame.getMethodName()
-                + ": " + dot.getPrintStr();
-        // System.out.println(printStr);
-        writeToFile(printStr);
-    }
+        // Ensure neither logger prints to the console.
+        mainOutputLogger.setUseParentHandlers(false);
+        debugLogger.setUseParentHandlers(false);
 
-    public static void debugPrint(DebugOutputType dot, String dotAddon) {
-        var frame = getFrame();
-        String printStr = Thread.currentThread().getName() + " in " + frame.getClassName() + "." + frame.getMethodName()
-                + ": " + dot.getPrintStr() + " " + dotAddon;
-        // System.out.println(printStr);
-        writeToFile(printStr);
-    }
+        // Configure the main output logger to print to a separate Swing window.
+        var logWindowFrame = SwingWindowHelperSingleton.getInstance().createLogWindow();
+        var mainOutputLoggerStreamHandler = new StreamHandler(new OutputStream() {
+            @Override
+            public void write(int b) {
+                var textArea = logWindowFrame.getTextArea();
+                textArea.append(String.valueOf((char) b));
+                textArea.setCaretPosition(textArea.getDocument().getLength());
+            }
+        }, new SimpleFormatter());
+        mainOutputLogger.addHandler(mainOutputLoggerStreamHandler);
 
-    public static void print(String baseStr) {
-        String printStr = "*** OUTPUT: " + baseStr + " ***";
-//        System.out.println(printStr + "\n");
-        SepWinOutWriter.getInstance().getLogger().info(printStr + "\n");
-        writeToFile(printStr);
-    }
-
-    public static void errorPrint(String baseStr) {
-        String printStr = "\nERROR OUTPUT: " + baseStr;
-        System.out.println(printStr);
-        writeToFile(printStr);
-    }
-
-    public static String getErrorStringThrow(String baseStr) {
-        return "\nERROR in thread " + Thread.currentThread().getName() + ": " + baseStr;
-    }
-
-    public static String getErrorStringCatch(Exception e) {
-        return "\nERROR in thread " + Thread.currentThread().getName() + ": " + e + "\n"
-                + Arrays.toString(e.getStackTrace());
-    }
-
-    /**
-     * Adapted from: https://stackoverflow.com/a/1625263/16458003
-     *
-     * @param s
-     */
-    public static void writeToFile(final String s) {
+        // Configure both loggers to print to their respective log files.
         try {
-            Files.writeString(Path.of(System.getProperty("java.io.tmpdir"), "os412_output.txt"), s + "\n\n", CREATE,
-                    APPEND);
-
+            mainOutputLogger.addHandler(new FileHandler(mainOutputLogFilePath));
+            debugLogger.addHandler(new FileHandler(debugLogFilePath));
         } catch (IOException e) {
-            System.out.println("Logging error -- exiting");
+            System.out.println("Failed to create log files -- exiting");
             System.exit(-1);
         }
     }
 
-    public enum DebugOutputType {
-        STOP("Stopping"), START("Starting"), INIT("Initting"),
-        SYNC_BEFORE_ENTER("About to enter synchronized block. Synced on"),
-        SYNC_ENTER("Just entered synchronized block. Synced on"), SYNC_LEAVE("Just left synchronized block. Synced on");
-
-        private final String printStr; // price of each apple
-
-        // Constructor
-        DebugOutputType(String printStr) {
-            this.printStr = printStr;
+    public static OutputHelper getInstance() {
+        if (instance == null) {
+            instance = new OutputHelper();
         }
+        return instance;
+    }
 
-        String getPrintStr() {
-            return printStr;
-        }
+    public Logger getDebugLogger() {
+        return debugLogger;
+    }
+
+    public Logger getMainOutputLogger() {
+        return mainOutputLogger;
     }
 }
