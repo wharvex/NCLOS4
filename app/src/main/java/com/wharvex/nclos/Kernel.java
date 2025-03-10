@@ -352,10 +352,8 @@ public class Kernel implements Stoppable, Runnable, Device {
           "New currentlyRunning: " + newCurRun.getThreadName());
       newCurRun.start();
 
-      // If contextSwitcher is not the new curRun, start the
-      // contextSwitcher.
-      // We ensure this because if it is the new curRun, it was
-      // already started.
+      // If contextSwitcher is not the new curRun, start the contextSwitcher.
+      // We ensure this b/c if it is the new curRun, it was already started.
       OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
           "Checking if we should start the UCS...");
       if (ucs != newCurRun.getUserlandProcess()) {
