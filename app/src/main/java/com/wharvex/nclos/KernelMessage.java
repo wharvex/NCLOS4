@@ -2,6 +2,7 @@ package com.wharvex.nclos;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 public class KernelMessage {
@@ -10,12 +11,14 @@ public class KernelMessage {
     private final byte[] messageContent;
     private Integer senderPid;
 
-    public KernelMessage(int targetPid, int messageType, String messageContent) {
+    public KernelMessage(int targetPid, int messageType,
+                         String messageContent) {
         this.targetPid = targetPid;
         this.messageType = messageType;
         this.messageContent = new byte[messageContent.length()];
         IntStream.range(0, messageContent.length())
-                .forEach(i -> this.messageContent[i] = (byte) messageContent.charAt(i));
+                .forEach(i -> this.messageContent[i] =
+                        (byte) messageContent.charAt(i));
     }
 
     /**
@@ -35,14 +38,11 @@ public class KernelMessage {
     }
 
     public Integer getSenderPid() {
-        try {
-            if (senderPid == null) {
-                throw new RuntimeException(
-                        OutputHelper.getErrorStringThrow("Tried to get senderPid but it was null."));
-            }
-        } catch (RuntimeException e) {
-            OutputHelper.writeToFile(e.toString());
-            throw e;
+        if (senderPid == null) {
+            throw new RuntimeException(
+                    OutputHelper.getInstance().logToAllAndReturnMessage(
+                            "Tried to get senderPid but it was null.",
+                            Level.SEVERE));
         }
         return senderPid;
     }
@@ -60,7 +60,8 @@ public class KernelMessage {
     }
 
     public String getMessageContentString() {
-        IntStream a = IntStream.range(0, getMessageContent().length).map(i -> getMessageContent()[i]);
+        IntStream a = IntStream.range(0, getMessageContent().length)
+                .map(i -> getMessageContent()[i]);
         StringWriter b = new StringWriter();
         a.forEach(b::write);
         return b.toString();
