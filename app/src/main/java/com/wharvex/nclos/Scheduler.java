@@ -284,19 +284,19 @@ public class Scheduler {
                     // have gotten here) to false, which will release the
                     // Timer from its waiting loop.
                     PCB::stop,
-                    () -> {
-                      OutputHelper.debugPrint("Timer found null CR");
-                      OutputHelper.debugPrint(
-                          "Bootloader is " +
-                              ThreadHelper.getThreadStateString(
-                                  "bootloaderThread"));
-                      OutputHelper.debugPrint(
-                          "Main is " + ThreadHelper.getThreadStateString(
-                              "mainThread"));
-                      OutputHelper.debugPrint(
-                          "Kernel is " + ThreadHelper.getThreadStateString(
-                              "kernelThread"));
-                    });
+                    () ->
+                        OutputHelper.getInstance().getDebugLogger()
+                            .log(Level.INFO,
+                                "Timer says: Found null currentlyRunning\n" +
+                                    "Bootloader is " +
+                                    ThreadHelper.getThreadStateString(
+                                        "bootloaderThread") +
+                                    "Main is " +
+                                    ThreadHelper.getThreadStateString(
+                                        "mainThread") +
+                                    "Kernel is " +
+                                    ThreadHelper.getThreadStateString(
+                                        "kernelThread")));
           }
         },
         1000,
@@ -313,12 +313,12 @@ public class Scheduler {
 
   public void addToPcbByPidComplete(PCB pcb, int pid) {
     getPcbByPidComplete().put(pid, pcb);
-    OutputHelper.debugPrint(
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
         "Added " + pcb.getThreadName() + " to pcbByPidComplete");
     getPcbByPidComplete()
         .forEach(
             (key, value) ->
-                OutputHelper.debugPrint(
+                OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
                     "Contents of pcbByPidComplete -- Key "
                         + key
                         + "; Value "
@@ -334,18 +334,26 @@ public class Scheduler {
   }
 
   public void addToWaitingMessages(KernelMessage km) {
-    OutputHelper.debugPrint("Adding " + km + " to waitingMessages");
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO, "Adding " + km + " to waitingMessages");
     getWaitingMessages().add(km);
-    OutputHelper.debugPrint(
-        "waitingMessages contents: " + getWaitingMessages());
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO,
+            "Contents of waitingMessages: " + getWaitingMessages());
   }
 
   public void addToWaitingRecipients(PCB pcb) {
-    OutputHelper.debugPrint(
-        "Adding " + pcb.getThreadName() + " to waitingRecipients");
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO,
+            "Adding " + pcb.getThreadName() + " to waitingRecipients");
     getWaitingRecipients().add(pcb);
-    OutputHelper.debugPrint(
-        "Contents of waitingRecipients: " + getWaitingRecipients());
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO,
+            "Contents of waitingRecipients: " + getWaitingRecipients());
   }
 
   public PCB getFromWaitingRecipients(int idx) {
