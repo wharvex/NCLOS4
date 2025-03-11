@@ -4,6 +4,15 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
+/**
+ * The problem that we are trying to solve by building an OS is that we have
+ * more than one program that we want to run, but only one CPU. We want all
+ * programs to make some forward progress over some reasonable period of
+ * time; we don’t want one single program to run, and no others get any run
+ * time. We want some level of fairness. To get that fairness, each program
+ * will get some amount of run time (called a QUANTUM). After that run time
+ * is over, another program will get a turn.
+ */
 public class Scheduler {
   // The priority-appropriate waiting queues.
   private final ArrayList<PCB> wqRealtime;
@@ -15,14 +24,16 @@ public class Scheduler {
   // The sleeping queue.
   private final ArrayList<PCB> sleepingQueue;
 
-  // The hashmap for looking up a PCB by its PID that contains all living PCBs.
+  // The hashmap for looking up a PCB by its PID that contains all living
+  // PCBs.
   private final HashMap<Integer, PCB> pcbByPidComplete;
 
-  // The hashmap for looking up a PCB by its PID that only contains PCBs waiting for a message.
+  // The hashmap for looking up a PCB by its PID that only contains PCBs
+  // waiting for a message.
   private final HashMap<Integer, PCB> pcbByPidMessageWaiters;
 
-  // The timer, which simulates the hardware-based timer that interrupts the CPU and makes switching
-  // between processes possible.
+  // The timer, which simulates the hardware-based timer that interrupts the
+  // CPU and makes switching between processes possible.
   private final Timer timer;
 
   // The currently running process.
@@ -41,7 +52,8 @@ public class Scheduler {
   }
 
   public void populateTlbRand() {
-    // Get random integers for zeroth and first virtual-to-physical mappings in the TLB.
+    // Get random integers for zeroth and first virtual-to-physical mappings
+    // in the TLB.
     int vz = RandomHelper.getVirtPageNum();
     int pz = RandomHelper.getPhysPageNum();
     int vf = RandomHelper.getVirtPageNum();
@@ -212,10 +224,13 @@ public class Scheduler {
 
   private void removeFromWQ(int idx) {
     PCB removed = getWQ().remove(idx);
-    OutputHelper.debugPrint(
-        "Removed " + removed.getThreadName() + " from wq");
-    OutputHelper.debugPrint("Contents of wq:");
-    getWQ().forEach(wqElm -> OutputHelper.debugPrint(wqElm.getThreadName()));
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "Removed " + removed.getThreadName() + " from waiting queue\n" +
+            "Contents of waiting queue:");
+    getWQ().forEach(
+        wqElm -> OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+            wqElm.getThreadName()));
+
   }
 
   private List<PCB> getWQ() {
@@ -230,23 +245,21 @@ public class Scheduler {
     Random r = new Random();
     int chosenIdx = r.nextInt(getWQ().size());
     PCB chosenProcess = getFromWQ(chosenIdx);
-    OutputHelper.debugPrint("The chosen process to switch to is " +
-        chosenProcess.getThreadName());
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "The chosen process to switch to is " +
+            chosenProcess.getThreadName());
     removeFromWQ(chosenIdx);
     return chosenProcess;
   }
 
   public int getPidByName(String name) {
-    try {
-      return getPcbByPidComplete().entrySet().stream()
-          .filter(e -> e.getValue().getThreadName().equals(name))
-          .findFirst()
-          .orElseThrow(() -> new RuntimeException("No such thread name"))
-          .getKey();
-    } catch (RuntimeException e) {
-      OutputHelper.writeToFile(e.toString());
-      throw e;
-    }
+    return getPcbByPidComplete().entrySet().stream()
+        .filter(e -> e.getValue().getThreadName().equals(name))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException(OutputHelper.getInstance()
+            .logToAllAndReturnMessage(
+                "Scheduler.getPidByName: No such thread name: " + name,
+                Level.SEVERE))).getKey();
   }
 
   public int getPid() {
@@ -254,17 +267,21 @@ public class Scheduler {
   }
 
   public void startTimer() {
-    OutputHelper.debugPrint("Scheduling Timer...");
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "Scheduling Timer...");
     timer.schedule(
         new TimerTask() {
           @Override
           public void run() {
-            OutputHelper.debugPrint("Starting");
+            OutputHelper.getInstance().getDebugLogger()
+                .log(Level.INFO, "Timer says: I'm starting...");
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
-                    // TODO: What happens if the currentlyRunning changes here?
-                    // OS will set shouldStopFromTimeout on the contextSwitcher (which is the
-                    // currentlyRunning we will have gotten here) to false, which will release the
+                    // TODO: What happens if the currentlyRunning changes
+                    //  here?
+                    // OS will set shouldStopFromTimeout on the
+                    // contextSwitcher (which is the currentlyRunning we will
+                    // have gotten here) to false, which will release the
                     // Timer from its waiting loop.
                     PCB::stop,
                     () -> {

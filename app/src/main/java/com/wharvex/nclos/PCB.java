@@ -7,6 +7,14 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.IntStream;
 
+/**
+ * Every process needs a kernel-based data structure to:
+ * 1) Keep track of its resources (memory, open files, etc.)
+ * 2) Keep statistics and information about the process.
+ * This kernel-based data structure is called the Process Control Block
+ * (abbreviated PCB). We will have queues (multiple) of PCBs. Each PCB will
+ * have a reference to the UserlandProcess as a member.
+ */
 public class PCB {
   private static int nextPid = 0;
   private final int[] deviceContentsIds;
