@@ -349,8 +349,8 @@ public class OS {
   }
 
   /**
-   * This is only set for a process when that process is chosen to run next, so there shouldn't be a
-   * danger of the wrong process getting them.
+   * This is only set for a process when that process is chosen to run next,
+   * so there shouldn't be a danger of the wrong process getting them.
    *
    * @param messages
    */
