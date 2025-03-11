@@ -2,6 +2,7 @@ package com.wharvex.nclos;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 public class ProcessCreator extends UserlandProcess {
   private final List<Integer> pingPids;
@@ -38,15 +39,14 @@ public class ProcessCreator extends UserlandProcess {
   }
 
   private void debugPrintOtherThreads() {
-    OutputHelper.debugPrint(
-        "Bootloader is " +
-            ThreadHelper.getThreadStateString("bootloaderThread"));
-    OutputHelper.debugPrint(
-        "Main is " + ThreadHelper.getThreadStateString("mainThread"));
-    OutputHelper.debugPrint(
-        "Kernel is " + ThreadHelper.getThreadStateString("kernelThread"));
-    OutputHelper.debugPrint(
-        "Timer is " + ThreadHelper.getThreadStateString("timerThread"));
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Debugging other threads\nBootloader is " +
+            ThreadHelper.getThreadStateString("bootloaderThread") +
+            "\nMain is " + ThreadHelper.getThreadStateString("mainThread") +
+            "\nKernel is " +
+            ThreadHelper.getThreadStateString("kernelThread") +
+            "\nTimer is " +
+            ThreadHelper.getThreadStateString("timerThread"));
   }
 
   private void testMessages(int iterationCounter) {
@@ -54,41 +54,46 @@ public class ProcessCreator extends UserlandProcess {
     switch (iterationCounter) {
       case 1:
         // Create Ping.
-        OutputHelper.print("ProcessCreator creating Ping");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator creating Ping");
         OS.createProcess(
             this,
             new Ping(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToPingPids((int) pid));
+            pid -> this.addToPingPids((int) pid));
         break;
       case 2:
         // Create Pong.
-        OutputHelper.print("ProcessCreator creating Pong");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator creating Pong");
         OS.createProcess(
             this,
             new Pong(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToPongPids((int) pid));
+            pid -> this.addToPongPids((int) pid));
         break;
       case 3:
         // Send Pong's pid to Ping.
-        OutputHelper.print(
-            "ProcessCreator sending message to ping with content: Pong's pid");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator sending message to ping with content: Pong's" +
+                " pid");
         OS.sendMessage(
             this,
             new KernelMessage(getPingPids().getFirst(), 1,
                 getPongPids().getFirst().toString()));
       case 4:
         // Send Ping's pid to Pong.
-        OutputHelper.print(
-            "ProcessCreator sending message to pong with content: Ping's pid");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator sending message to pong with content: Ping's" +
+                " pid");
         OS.sendMessage(
             this,
             new KernelMessage(getPongPids().getFirst(), 1,
                 getPingPids().getFirst().toString()));
       default:
         // Done.
-        OutputHelper.print("ProcessCreator done testing messages.");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator done testing messages.");
         debugPrintOtherThreads();
     }
   }
@@ -98,32 +103,31 @@ public class ProcessCreator extends UserlandProcess {
     switch (iterationCounter) {
       case 1:
         // Create PagingTestA.
-        OutputHelper.print("ProcessCreator creating PagingTestA");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator creating PagingTestA");
         OS.createProcess(
             this,
             new PagingTestA(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToPagingTestAPids(
-                (int) pid));
+            pid -> this.addToPagingTestAPids((int) pid));
         break;
       case 2:
         // Create PagingTestB.
-        OutputHelper.print("ProcessCreator creating PagingTestB");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator creating PagingTestB");
         OS.createProcess(
             this,
             new PagingTestB(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToPagingTestBPids(
-                (int) pid));
+            pid -> this.addToPagingTestBPids((int) pid));
         break;
       default:
         // Done.
-        OutputHelper.print("ProcessCreator done testing paging.");
-        OutputHelper.print(
-            "ProcessCreator says: PagingTestA pid: " +
-                getPagingTestAPids().getFirst());
-        OutputHelper.print(
-            "ProcessCreator says: PagingTestB pid: " +
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator says: I'm done testing paging.\n" +
+                "ProcessCreator says: PagingTestA pid: " +
+                getPagingTestAPids().getFirst() + "\n" +
+                "ProcessCreator says: PagingTestB pid: " +
                 getPagingTestBPids().getFirst());
         debugPrintOtherThreads();
     }
@@ -134,33 +138,31 @@ public class ProcessCreator extends UserlandProcess {
     switch (iterationCounter) {
       case 1:
         // Create VirtMemTestA
-        OutputHelper.print("ProcessCreator creating VirtMemTestA");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator creating VirtMemTestA");
         OS.createProcess(
             this,
             new VirtMemTestA(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToVirtMemTestAPids(
-                (int) pid));
+            pid -> this.addToVirtMemTestAPids((int) pid));
         break;
       case 2:
         // Create VirtMemTestB.
-        OutputHelper.print("ProcessCreator creating VirtMemTestB");
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator says: I'm creating VirtMemTestB");
         OS.createProcess(
             this,
             new VirtMemTestB(),
             Scheduler.PriorityType.INTERACTIVE,
-            (ucs, pid) -> ((ProcessCreator) ucs).addToVirtMemTestBPids(
-                (int) pid));
+            pid -> this.addToVirtMemTestBPids((int) pid));
         break;
       default:
         // Done.
-        OutputHelper.print(
-            "ProcessCreator says: I'm done setting up virtual memory testing.");
-        OutputHelper.print(
-            "ProcessCreator says: VirtMemTestA pid: " +
-                getVirtMemTestAPids().getFirst());
-        OutputHelper.print(
-            "ProcessCreator says: VirtMemTestB pid: " +
+        OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+            "ProcessCreator says: I'm done testing virtual memory.\n" +
+                "ProcessCreator says: VirtMemTestA pid: " +
+                getVirtMemTestAPids().getFirst() + "\n" +
+                "ProcessCreator says: VirtMemTestB pid: " +
                 getVirtMemTestBPids().getFirst());
         debugPrintOtherThreads();
     }
@@ -171,8 +173,8 @@ public class ProcessCreator extends UserlandProcess {
     int i = 0;
     while (true) {
       // Initial announcement.
-      OutputHelper.print(
-          "Hello from ProcessCreator. Times printed: " + (++i));
+      OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+          "ProcessCreator says: This is iteration " + i++);
 
       // Test messages.
       // testMessages(i);
@@ -198,42 +200,54 @@ public class ProcessCreator extends UserlandProcess {
   }
 
   public void addToPingPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to pingPids");
+    OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+        "ProcessCreator says: Adding " + pid + " to pingPids");
     getPingPids().add(pid);
-    OutputHelper.debugPrint("Contents of pingPids: " + getPingPids());
+    OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+        "ProcessCreator says: Contents of pingPids: " + getPingPids());
   }
 
   public void addToPongPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to pongPids");
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Adding " + pid + " to pongPids");
     getPongPids().add(pid);
-    OutputHelper.debugPrint("Contents of pongPids: " + getPongPids());
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Contents of pongPids: " + getPongPids());
   }
 
   public void addToPagingTestAPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to pagingTestAPids");
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Adding " + pid + " to pagingTestAPids");
     getPagingTestAPids().add(pid);
-    OutputHelper.debugPrint(
-        "Contents of pagingTestAPids: " + getPagingTestAPids());
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Contents of pagingTestAPids: " +
+            getPagingTestAPids());
   }
 
   public void addToPagingTestBPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to pagingTestBPids");
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Adding " + pid + " to pagingTestBPids");
     getPagingTestBPids().add(pid);
-    OutputHelper.debugPrint(
-        "Contents of pagingTestBPids: " + getPagingTestBPids());
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Contents of pagingTestBPids: " +
+            getPagingTestBPids());
   }
 
   public void addToVirtMemTestAPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to virtMemTestAPids");
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Adding " + pid + " to virtMemTestAPids");
     getVirtMemTestAPids().add(pid);
-    OutputHelper.debugPrint(
-        "Contents of virtMemTestAPids: " + getVirtMemTestAPids());
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Contents of virtMemTestAPids: " +
+            getVirtMemTestAPids());
   }
 
   public void addToVirtMemTestBPids(int pid) {
-    OutputHelper.debugPrint("Adding " + pid + " to virtMemTestBPids");
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Adding " + pid + " to virtMemTestBPids");
     getVirtMemTestBPids().add(pid);
-    OutputHelper.debugPrint(
-        "Contents of virtMemTestBPids: " + getVirtMemTestBPids());
+    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+        "ProcessCreator says: Contents of virtMemTestBPids: " +
+            getVirtMemTestBPids());
   }
 }
