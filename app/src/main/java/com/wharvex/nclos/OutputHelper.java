@@ -70,8 +70,12 @@ public class OutputHelper {
   }
 
   public String logToAllAndReturnMessage(String message, Level level) {
+    logToAll(message, level);
+    return message;
+  }
+
+  public void logToAll(String message, Level level) {
     getDebugLogger().log(level, message);
     getMainOutputLogger().log(level, message);
-    return message;
   }
 }

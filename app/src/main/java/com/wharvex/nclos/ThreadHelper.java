@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class ThreadHelper {
+  // TODO: Make a method for enforcing semaphore parking space reservations.
 
   public static Optional<Thread> getThreadByName(String threadName) {
     return Thread.getAllStackTraces().keySet().stream()
@@ -20,12 +21,11 @@ public class ThreadHelper {
     Thread.getAllStackTraces()
         .keySet()
         .forEach(
-            t -> {
-              OutputHelper.debugPrint("Thread: " + t.getName());
-              OutputHelper.debugPrint("Status: " + t.getState());
-              OutputHelper.debugPrint(
-                  "Stack trace: " + Arrays.toString(t.getStackTrace()));
-            });
+            t ->
+                OutputHelper.getInstance().getDebugLogger().info(
+                    "Thread: " + t.getName() + "\nState: " + t.getState() +
+                        "\nStack trace: " +
+                        Arrays.toString(t.getStackTrace())));
   }
 
   public static void threadSleep(long millis) {

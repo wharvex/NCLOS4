@@ -114,12 +114,10 @@ public class OS {
    * @param callType
    * @param params
    */
-  public static void switchContext(
-      UnprivilegedContextSwitcher cs, CallType callType,
-
-      Consumer<Object> retSaver,
-
-      Object... params) {
+  public static void switchContext(UnprivilegedContextSwitcher cs,
+                                   CallType callType,
+                                   Consumer<Object> retSaver,
+                                   Object... params) {
     OutputHelper.getInstance().getDebugLogger()
         .log(Level.INFO, "About to enter synchronized block for " + cs +
             " with call type " + callType);
