@@ -1,6 +1,8 @@
 package com.wharvex.nclos;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.*;
 
 public class OutputHelper {
@@ -29,19 +31,8 @@ public class OutputHelper {
             new SimpleFormatter());
     mainOutputLogger.addHandler(mainOutputLoggerStreamHandler);
 
-    // Configure the debug logger to print to a separate window.
-    var debugLogFrame =
-        SwingWindowHelperSingleton.getInstance()
-            .createLogWindow("Debug Log");
-    var debugLoggerStreamHandler =
-        new StreamHandler(
-            new OutputStreamExt(debugLogFrame.getTextArea()),
-            new SimpleFormatter());
-    debugLogger.addHandler(debugLoggerStreamHandler);
-
-    // Show the log windows.
+    // Show the log window.
     mainOutputLogFrame.setVisible(true);
-    debugLogFrame.setVisible(true);
 
     // Configure loggers to print to their respective log files.
     try {
@@ -52,6 +43,13 @@ public class OutputHelper {
       System.out.println("Failed to create log files -- exiting");
       System.exit(-1);
     }
+
+    // Start the log with a timestamp.
+    long milliseconds = System.currentTimeMillis();
+    SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+    Date resultdate = new Date(milliseconds);
+    mainOutputLogger.log(Level.INFO,
+        "Starting log at " + sdf.format(resultdate));
   }
 
   public static OutputHelper getInstance() {
