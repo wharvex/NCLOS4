@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 
 public abstract class UserlandProcess
     implements Runnable, UnprivilegedContextSwitcher {
@@ -44,57 +45,55 @@ public abstract class UserlandProcess
   }
 
   public static byte preGetFromPhysicalMemory(int idx) {
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm about to enter getFromPhysicalMemory");
     var ret = getFromPhysicalMemory(idx);
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_LEAVE,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I have left getFromPhysicalMemory");
     return ret;
   }
 
   public static void preSetOnPhysicalMemory(int idx, byte val) {
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm about to enter setOnPhysicalMemory");
     setOnPhysicalMemory(idx, val);
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_LEAVE,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I have left setOnPhysicalMemory");
   }
 
   private static synchronized int getFromTlb(int vOrP, int zOrF) {
     var ret = getTlb()[vOrP][zOrF];
-    OutputHelper.debugPrint("TLB[" + vOrP + "][" + zOrF + "] is " + ret);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "TLB[" + vOrP + "][" + zOrF + "] is " + ret);
     return ret;
   }
 
   private static synchronized void setOnTlb(int vOrP, int zOrF, int val) {
-    OutputHelper.debugPrint(
-        "Setting TLB[" + vOrP + "][" + zOrF + "] to " + val);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "Setting TLB[" + vOrP + "][" + zOrF + "] to " + val);
     getTlb()[vOrP][zOrF] = val;
   }
 
   public static int preGetFromTlb(int vOrP, int zOrF) {
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "UP says: I'm about to enter getFromTlb");
     var ret = getFromTlb(vOrP, zOrF);
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_LEAVE,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "UP says: I have left getFromTlb");
     return ret;
   }
 
   public static synchronized void preSetOnTlb(int vOrP, int zOrF, int val) {
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "UP says: I'm about to enter setOnTlb");
     setOnTlb(vOrP, zOrF, val);
-    OutputHelper.debugPrint(
-        OutputHelper.DebugOutputType.SYNC_LEAVE,
-        UserlandProcess.class.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "UP says: I have left setOnTlb");
   }
 
   /**
@@ -105,9 +104,11 @@ public abstract class UserlandProcess
   }
 
   public synchronized boolean isStopRequested() {
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER,
-        this.toString());
-    OutputHelper.debugPrint("stopRequested is " + shouldStopFromTimeout);
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in isStopRequested\nshouldStopFromTimeout is " +
+                shouldStopFromTimeout);
     return shouldStopFromTimeout;
   }
 
