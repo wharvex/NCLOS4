@@ -6,44 +6,47 @@ import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 
 public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
-    private final Semaphore semaphore;
-    private final Thread thread;
-    private final List<Object> csRets;
+  private final Semaphore semaphore;
+  private final Thread thread;
+  private final List<Object> csRets;
+  private final int testChoice;
 
-    public Bootloader() {
-        semaphore = new Semaphore(0);
-        thread = new Thread(this, "bootloaderThread");
-        csRets = new ArrayList<>();
-    }
+  public Bootloader(int testChoice) {
+    semaphore = new Semaphore(0);
+    thread = new Thread(this, "bootloaderThread");
+    csRets = new ArrayList<>();
+    this.testChoice = testChoice;
+  }
 
-    @Override
-    public Semaphore getSemaphore() {
-        return semaphore;
-    }
+  @Override
+  public Semaphore getSemaphore() {
+    return semaphore;
+  }
 
-    @Override
-    public Thread getThread() {
-        return thread;
-    }
+  @Override
+  public Thread getThread() {
+    return thread;
+  }
 
-    @Override
-    public List<Object> getCsRets() {
-        return csRets;
-    }
+  @Override
+  public List<Object> getCsRets() {
+    return csRets;
+  }
 
-    @Override
-    public List<KernelMessage> getMessages() {
-        return null;
-    }
+  @Override
+  public List<KernelMessage> getMessages() {
+    return null;
+  }
 
-    @Override
-    public boolean isStopped() {
-        return UnprivilegedContextSwitcher.super.isStopped();
-    }
+  @Override
+  public boolean isStopped() {
+    return UnprivilegedContextSwitcher.super.isStopped();
+  }
 
-    @Override
-    public void run() {
-        OutputHelper.getInstance().getDebugLogger().log(Level.INFO, "Bootloader thread started");
-        OS.startup(this);
-    }
+  @Override
+  public void run() {
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "Bootloader thread started");
+    OS.startup(this, testChoice);
+  }
 }

@@ -45,4 +45,36 @@ public class MiscHelper {
   public static int[] makeIntArr(int size) {
     return IntStream.generate(() -> -1).limit(size).toArray();
   }
+
+  // Split an input string into n substrings and store them in an array.
+  // Their order in the array equals their order in the input.
+  // No substring is to exceed m characters in length.
+  public static String[] splitString(String s, int m) {
+    // Get the length of the input string.
+    int len = s.length();
+
+    // Get the number of splits to make:
+    // 1. Round the input string length up by m - 1.
+    // (We do this because integer division floors the result.)
+    // 2. Divide the result by the maximum length of each split.
+    int n = (len + m - 1) / m;
+
+    // Create an array to store the substrings.
+    String[] result = new String[n];
+
+    // Populate the array.
+    for (int i = 0; i < n; i++) {
+      // The start of the substring in the input string is the index of the
+      // first character of the input string, or of the next one after
+      // traversing m characters, or the next one after traversing an
+      // additional m characters, etc.
+      int start = i * m;
+
+      // The end of the substring is the start plus m, or the length of the
+      // input string, whichever comes first.
+      int end = Math.min(start + m, len);
+      result[i] = s.substring(start, end);
+    }
+    return result;
+  }
 }

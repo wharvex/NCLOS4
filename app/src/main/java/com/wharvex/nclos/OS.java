@@ -1,7 +1,6 @@
 package com.wharvex.nclos;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -46,15 +45,16 @@ public class OS {
    * @param cs
    * @return
    */
-  public static void startup(UnprivilegedContextSwitcher cs) {
+  public static void startup(UnprivilegedContextSwitcher cs,
+                             int testChoice) {
     // Create Kernel and start its thread.
     kernel = new Kernel();
     getKernel().init();
 
     // Create the ProcessCreator process; switch to it; save its pid to the
     // bootloader.
-    startupCreateProcess(cs, new ProcessCreator(),
-        Scheduler.PriorityType.REALTIME);
+    startupCreateProcess(cs, new ProcessCreator(testChoice),
+        Scheduler.PriorityType.REALTIME, testChoice);
   }
 
   public static void open(
@@ -71,7 +71,8 @@ public class OS {
    */
   private static Kernel getKernel() {
     Objects.requireNonNull(kernel,
-        "Tried to get OS.kernel but it was null.");
+        OutputHelper.getInstance().getErrorMessageSupplier(
+            "Tried to get OS.kernel but it was null."));
     return kernel;
   }
 
@@ -81,9 +82,9 @@ public class OS {
 
   public static void startupCreateProcess(
       UnprivilegedContextSwitcher cs, UserlandProcess processCreator,
-      Scheduler.PriorityType pt) {
+      Scheduler.PriorityType pt, int testChoice) {
     switchContext(cs, CallType.STARTUP_CREATE_PROCESS, cs::addToCsRets,
-        processCreator, pt);
+        processCreator, pt, testChoice);
   }
 
   public static void createProcess(
@@ -218,9 +219,8 @@ public class OS {
     // Throw an exception if the param is null and log the exception.
     Objects.requireNonNull(
         param,
-        OutputHelper.getInstance().logToAllAndReturnMessage(
-            "Tried to get param at index " + idx + " but it was null.",
-            Level.SEVERE));
+        OutputHelper.getInstance().getErrorMessageSupplier(
+            "Tried to get param at index " + idx + " but it was null."));
 
     // Return the param.
     return param;
@@ -273,9 +273,8 @@ public class OS {
   public static UnprivilegedContextSwitcher getContextSwitcher() {
     Objects.requireNonNull(
         contextSwitcher,
-        OutputHelper.getInstance().logToAllAndReturnMessage(
-            "Tried to get OS.contextSwitcher but it was null.",
-            Level.SEVERE));
+        OutputHelper.getInstance().getErrorMessageSupplier(
+            "Tried to get OS.contextSwitcher but it was null."));
     OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
         "OS.contextSwitcher is " + contextSwitcher.getThreadName());
     return contextSwitcher;
@@ -284,8 +283,8 @@ public class OS {
   public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     Objects.requireNonNull(
         cs,
-        OutputHelper.getInstance().logToAllAndReturnMessage(
-            "Cannot set OS.contextSwitcher to null", Level.SEVERE));
+        OutputHelper.getInstance().getErrorMessageSupplier(
+            "Cannot set OS.contextSwitcher to null"));
     OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
         "Setting OS.contextSwitcher to " + cs.getThreadName());
     contextSwitcher = cs;
@@ -293,8 +292,8 @@ public class OS {
 
   public static CallType getCallType() {
     Objects.requireNonNull(callType,
-        OutputHelper.getInstance().logToAllAndReturnMessage(
-            "Tried to get OS.callType but it was null", Level.SEVERE));
+        OutputHelper.getInstance().getErrorMessageSupplier(
+            "Tried to get OS.callType but it was null"));
     return callType;
   }
 
@@ -311,8 +310,7 @@ public class OS {
    */
   public static void setCallType(CallType ct) {
     Objects.requireNonNull(ct, OutputHelper.getInstance()
-        .logToAllAndReturnMessage("Cannot set OS.callType to null",
-            Level.SEVERE));
+        .getErrorMessageSupplier("Cannot set OS.callType to null"));
     callType = ct;
   }
 

@@ -11,8 +11,9 @@ public class ProcessCreator extends UserlandProcess {
   private final List<Integer> pagingTestBPids;
   private final List<Integer> virtMemTestAPids;
   private final List<Integer> virtMemTestBPids;
+  private final int testChoice;
 
-  public ProcessCreator() {
+  public ProcessCreator(int testChoice) {
     super("0", "processCreator");
     pingPids = new ArrayList<>();
     pongPids = new ArrayList<>();
@@ -20,6 +21,7 @@ public class ProcessCreator extends UserlandProcess {
     pagingTestBPids = new ArrayList<>();
     virtMemTestAPids = new ArrayList<>();
     virtMemTestBPids = new ArrayList<>();
+    this.testChoice = testChoice;
   }
 
   public List<Integer> getVirtMemTestAPids() {
@@ -176,16 +178,32 @@ public class ProcessCreator extends UserlandProcess {
       OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
           "ProcessCreator says: This is iteration " + i++);
 
-      // Test messages.
-      // testMessages(i);
+      // TODO: Make it so the user can choose a new test after the current
+      //  one ends. This might require a new method in OS to stop all
+      //  processes.
 
-      // Test paging.
-      // testPaging(i);
+      // TODO: Make testDevices and testPriorityScheduler methods.
 
-      // Test virtual memory.
-      testVirtualMemory(i);
+      // Choose what to do based on test choice.
+      switch (testChoice) {
+        case 3:
+          testMessages(i);
+          break;
+        case 4:
+          testPaging(i);
+          break;
+        case 5:
+          testVirtualMemory(i);
+          break;
+        default:
+          // Invalid choice.
+          OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+              "ProcessCreator says: Invalid test choice");
+          return;
+      }
 
       // Sleep and cooperate.
+      // TODO: Why does it sleep before cooperating?
       ThreadHelper.threadSleep(1000);
       cooperate();
     }

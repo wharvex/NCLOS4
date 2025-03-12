@@ -1,8 +1,7 @@
 package com.wharvex.nclos;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.function.Supplier;
 import java.util.logging.*;
 
 public class OutputHelper {
@@ -43,13 +42,6 @@ public class OutputHelper {
       System.out.println("Failed to create log files -- exiting");
       System.exit(-1);
     }
-
-    // Start the log with a timestamp.
-    long milliseconds = System.currentTimeMillis();
-    SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-    Date resultdate = new Date(milliseconds);
-    mainOutputLogger.log(Level.INFO,
-        "Starting log at " + sdf.format(resultdate));
   }
 
   public static OutputHelper getInstance() {
@@ -75,5 +67,9 @@ public class OutputHelper {
   public void logToAll(String message, Level level) {
     getDebugLogger().log(level, message);
     getMainOutputLogger().log(level, message);
+  }
+
+  public Supplier<String> getErrorMessageSupplier(String message) {
+    return () -> logToAllAndReturnMessage(message, Level.SEVERE);
   }
 }

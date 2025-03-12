@@ -126,6 +126,9 @@ public class Kernel implements Stoppable, Runnable, Device {
   private void startupCreateProcess() {
     UserlandProcess processCreator = (UserlandProcess) OS.getParam(0);
     Scheduler.PriorityType pt = (Scheduler.PriorityType) OS.getParam(1);
+
+    // TODO: Get a parameter to (let the user) choose the process to create.
+
     PCB pcb = createPCB(processCreator, pt);
     pcb.init();
     getScheduler().preSetCurrentlyRunning(pcb);
