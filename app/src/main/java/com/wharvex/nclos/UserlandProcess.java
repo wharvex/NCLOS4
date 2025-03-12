@@ -113,32 +113,39 @@ public abstract class UserlandProcess
   }
 
   public synchronized void setStopRequested(boolean isRequested) {
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_ENTER,
-        this.toString());
-    OutputHelper.debugPrint("Setting stopRequested to " + isRequested);
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in setStopRequested\n" +
+                "setting shouldStopFromTimeout to " +
+                isRequested);
     shouldStopFromTimeout = isRequested;
   }
 
   public void preSetStopRequested(boolean isRequested) {
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER,
-        this.toString());
-    OutputHelper.debugPrint("About to enter setStopRequested");
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm about to enter setStopRequested");
     setStopRequested(isRequested);
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE,
-        this.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I have left setStopRequested");
   }
 
   public boolean preIsStopRequested() {
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_BEFORE_ENTER,
-        this.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm about to enter isStopRequested");
     var ret = isStopRequested();
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.SYNC_LEAVE,
-        this.toString());
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I have left isStopRequested");
     return ret;
   }
 
   public void cooperate() {
-    OutputHelper.debugPrint("Cooperating...");
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO, "UP says: I'm in cooperate");
     if (preIsStopRequested()) {
       OS.switchProcess(this);
     }
@@ -156,7 +163,9 @@ public abstract class UserlandProcess
 
   @Override
   public void run() {
-    OutputHelper.debugPrint(OutputHelper.DebugOutputType.INIT);
+    OutputHelper.getInstance()
+        .getDebugLogger()
+        .log(Level.INFO, "UP says: I'm just getting started.");
     stop();
     main();
   }
@@ -173,9 +182,11 @@ public abstract class UserlandProcess
 
   public void setShouldStopAfterContextSwitch(
       boolean shouldStopAfterContextSwitch) {
-    OutputHelper.debugPrint(
-        "Setting shouldStopAfterContextSwitch to " +
-            shouldStopAfterContextSwitch);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in setShouldStopAfterContextSwitch\n" +
+                "Setting shouldStopAfterContextSwitch to " +
+                shouldStopAfterContextSwitch);
     this.shouldStopAfterContextSwitch = shouldStopAfterContextSwitch;
   }
 
@@ -193,25 +204,42 @@ public abstract class UserlandProcess
     getMessages().addAll(kms);
   }
 
+  // TODO: Can we implement something a little better here?
+  //  Not a big fan of sleep in a loop.
   public void waitUntilStoppedByRequest() {
     while (preIsStopRequested()) {
-      OutputHelper.debugPrint(
-          "Waiting for " + getThreadName() + " to stop from request");
+      OutputHelper.getInstance().getDebugLogger()
+          .log(Level.INFO,
+              "UP says: I'm in waitUntilStoppedByRequest\n" +
+                  "Waiting for " + getThreadName() +
+                  " to stop from request");
       ThreadHelper.threadSleep(10);
     }
   }
 
   private int getPhysAddr(int virtAddr) {
     int virtualPageNumber = virtAddr / OS.getPageSize();
-    OutputHelper.debugPrint("virtualPageNumber: " + virtualPageNumber);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in getPhysAddr\n" +
+                "virtualPageNumber is " + virtualPageNumber);
     int pageOffset = virtAddr % OS.getPageSize();
-    OutputHelper.debugPrint("offset: " + pageOffset);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in getPhysAddr\n" +
+                "pageOffset is " + pageOffset);
     int physicalPageNumber =
         matchAndReturnPhys(virtualPageNumber).orElse(-1);
-    OutputHelper.debugPrint("physicalPageNumber: " + physicalPageNumber);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in getPhysAddr\n" +
+                "physicalPageNumber is " + physicalPageNumber);
     int physicalAddress =
         (physicalPageNumber * OS.getPageSize()) + pageOffset;
-    OutputHelper.debugPrint("physicalAddress: " + physicalAddress);
+    OutputHelper.getInstance().getDebugLogger()
+        .log(Level.INFO,
+            "UP says: I'm in getPhysAddr\n" +
+                "physicalAddress is " + physicalAddress);
     return physicalAddress;
   }
 

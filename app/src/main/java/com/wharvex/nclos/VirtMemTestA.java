@@ -3,6 +3,7 @@ package com.wharvex.nclos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class VirtMemTestA extends UserlandProcess {
   private final List<Integer> fileDescriptors = new ArrayList<>();
@@ -31,74 +32,85 @@ public class VirtMemTestA extends UserlandProcess {
     byte writeByte = 33;
     int virtualAddress = -1;
     while (true) {
-      OutputHelper.print(
-          "Hello from VirtMemTestA " + getDebugPid() + " (times printed: " +
-              (++i) + ")");
+      OutputHelper.getInstance().getMainOutputLogger()
+          .log(Level.INFO, "VirtMemTestA says: " +
+              getDebugPid() + " (times printed: " + (++i) + ")");
       switch (i) {
         case 1:
           // Create swapfile.
-          OutputHelper.print(
-              "VirtMemTestA says: attempting to create/open swap file.");
+          OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+              "VirtMemTestA says: I'm creating/opening the swapfile.");
           OS.open(this, id -> this.addToFileDescriptors((int) id),
               "file swap");
           break;
         case 2:
           // Print swapfile FD.
-          OutputHelper.print("VirtMemTestA says: swapfile FD: " +
-              getFromFileDescriptors(0));
+          // TODO: Error handling.
+          OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
+              "VirtMemTestA says: Swapfile FD: " +
+                  getFromFileDescriptors(0));
           break;
         case 3:
           // Lazy allocate a reasonable amount.
-          OutputHelper.print(
-              "VirtMemTestA says: attempting to allocate "
-                  + allocationSizeInPages
-                  + " pages of memory.");
+          OutputHelper.getInstance().getMainOutputLogger()
+              .log(Level.INFO,
+                  "VirtMemTestA says: attempting to allocate "
+                      + allocationSizeInPages
+                      + " pages of memory.");
           OS.allocateMemory(
               this,
-              (ucs, idx) -> allocationIndices.add((int) idx),
+              idx -> allocationIndices.add((int) idx),
               allocationSizeInPages * OS.getPageSize());
           virtualAddress = allocationIndices.getFirst();
           if (virtualAddress >= 0) {
-            OutputHelper.print(
-                "VirtMemTestA says: successfully allocated "
-                    + allocationSizeInPages
-                    + " pages of memory starting at virtual address "
-                    + virtualAddress);
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: successfully allocated "
+                        + allocationSizeInPages
+                        + " pages of memory starting at virtual address "
+                        + virtualAddress);
           } else {
-            OutputHelper.print("VirtMemTestA says: failed to allocate.");
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: failed to allocate.");
           }
           break;
         case 4:
           // Write.
           if (virtualAddress >= 0) {
-            OutputHelper.print(
-                "VirtMemTestA says: attempting to write "
-                    + writeByte
-                    + " to virtual address "
-                    + virtualAddress);
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: attempting to write "
+                        + writeByte
+                        + " to virtual address "
+                        + virtualAddress);
             write(virtualAddress, writeByte);
           } else {
-            OutputHelper.print(
-                "VirtMemTestA says: not attempting case 4 write due to case 3 allocation failure.");
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: not attempting case 4 write due to" +
+                        " case 3 allocation failure.");
           }
           break;
         case 5:
           // Read.
           if (virtualAddress >= 0) {
-            OutputHelper.print(
-                "VirtMemTestA says: attempting to read from virtual address " +
-                    virtualAddress);
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: attempting to read from virtual address "
+                        + virtualAddress);
             byte readByte = read(virtualAddress);
-            OutputHelper.print(
-                "VirtMemTestA says: read "
-                    + readByte
-                    + " from virtual address "
-                    + virtualAddress
-                    + "; expected "
-                    + writeByte);
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: read "
+                        + readByte
+                        + " from virtual address "
+                        + virtualAddress + "; expected " + writeByte);
           } else {
-            OutputHelper.print(
-                "VirtMemTestA not attempting case 5 read due to case 3 allocation failure.");
+            OutputHelper.getInstance().getMainOutputLogger()
+                .log(Level.INFO,
+                    "VirtMemTestA says: not attempting case 5 read due to" +
+                        " case 3 allocation failure.");
           }
           break;
         case 6:
@@ -109,7 +121,9 @@ public class VirtMemTestA extends UserlandProcess {
           break;
 
         default:
-          OutputHelper.print("VirtMemTestA says: done testing.");
+          OutputHelper.getInstance().getMainOutputLogger()
+              .log(Level.INFO,
+                  "VirtMemTestA says: done testing.");
       }
       ThreadHelper.threadSleep(1000);
       cooperate();
