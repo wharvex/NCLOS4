@@ -326,6 +326,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   public void run() {
     OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
         "Kernel thread started");
+    NclosLogger.logDebug();
     while (true) {
       stop();
 

@@ -64,14 +64,12 @@ public class MiscHelper {
 
     // Populate the array.
     for (int i = 0; i < n; i++) {
-      // The start of the substring in the input string is the index of the
-      // first character of the input string, or of the next one after
-      // traversing m characters, or the next one after traversing an
-      // additional m characters, etc.
+      // Start is (the index of) the first character of the input, or the
+      // next one after m characters, or the next one after m more, etc.
       int start = i * m;
 
-      // The end of the substring is the start plus m, or the length of the
-      // input string, whichever comes first.
+      // End is m characters after start, or the length of the input,
+      // whichever comes first.
       int end = Math.min(start + m, len);
       result[i] = s.substring(start, end);
     }
