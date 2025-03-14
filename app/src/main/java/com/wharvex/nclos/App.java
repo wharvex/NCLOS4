@@ -1,13 +1,11 @@
 package com.wharvex.nclos;
 
 import java.util.Scanner;
-import java.util.logging.Level;
 
 public class App {
   public static void main(String[] args) {
     Thread.currentThread().setName("mainThread");
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "begin execution trace");
+    NclosLogger.logDebugThread(ThreadLifeStage.STARTING);
 
     // Try with resources.
     try (Scanner sc = new Scanner(System.in)) {
@@ -37,8 +35,7 @@ public class App {
     }
 
     // The user has chosen to exit.
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "end execution trace");
+    NclosLogger.logDebugThread(ThreadLifeStage.STOPPING);
     System.exit(0);
   }
 

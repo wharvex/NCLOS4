@@ -38,10 +38,8 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   public int[] getDeviceFromPidToDevice(int pid) {
     if (!getPidToDevice().containsKey(pid)) {
-      var msg = "No such pid in here: " + pid;
       throw new RuntimeException(
-          OutputHelper.getInstance().logToAllAndReturnMessage(
-              msg, Level.SEVERE));
+          NclosLogger.logError("PID_NOT_FOUND:{3};", pid).get());
     }
     return getPidToDevice().get(pid);
   }
@@ -107,8 +105,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   private PCB createPCB(UserlandProcess up, Scheduler.PriorityType pt) {
     // Create a new PCB.
     PCB pcb = new PCB(up, pt);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        up.getThreadName() + " has now been created");
+    NclosLogger.logDebug("PCB_CREATED:{3};", pcb.getThreadName());
 
     // Add newly created PCB to the hashmap that finds a PCB by its pid.
     getScheduler().addToPcbByPidComplete(pcb, pcb.getPid());
@@ -178,8 +175,7 @@ public class Kernel implements Stoppable, Runnable, Device {
                 getScheduler().getPidByName(
                     getCurrentlyRunningSafe()
                         .getThreadName()));
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Message waiter thread: " + pcb.getThreadName());
+    NclosLogger.logDebug("PCB_WAITING_FOR_MESSAGE:{3}", pcb.getThreadName());
 
     // Add message waiter PCB to the waitingRecipients queue.
     getScheduler().addToWaitingRecipients(pcb);
@@ -224,21 +220,14 @@ public class Kernel implements Stoppable, Runnable, Device {
   private void allocateMemory() {
     // Get Allocation Size In Bytes.
     int allocationSizeInBytes = (int) OS.getParam(0);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Attempting to translate allocation size request "
-            + allocationSizeInBytes
-            + " from bytes to pages for "
-            + getCurrentlyRunningSafe().getThreadName());
+    NclosLogger.logDebug("ALLOCATION_SIZE:{3};REQUESTER:{4};",
+        allocationSizeInBytes, getCurrentlyRunningSafe().getThreadName());
 
     // Enforce that ASIB is a multiple of pageSize.
     if (allocationSizeInBytes % OS.getPageSize() != 0) {
-      OutputHelper.getInstance().getDebugLogger().log(Level.SEVERE,
-          "Allocation size is not a multiple of page size.");
-      OutputHelper.getInstance().getMainOutputLogger()
-          .log(Level.SEVERE,
-              "Allocation size is not a multiple of " +
-                  "page size.");
-      throw new RuntimeException();
+      throw new RuntimeException(
+          NclosLogger.logError("ALLOCATION_SIZE_NOT_MULTIPLE_OF_PAGE_SIZE")
+              .get());
     }
 
     // Get Allocation Size In Pages.
@@ -324,18 +313,15 @@ public class Kernel implements Stoppable, Runnable, Device {
 
   @Override
   public void run() {
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Kernel thread started");
-    NclosLogger.logDebug();
+    NclosLogger.logDebugThread(ThreadLifeStage.STARTING);
     while (true) {
       stop();
 
       // Announce the call type and context switcher.
       var ct = OS.getCallType();
       UnprivilegedContextSwitcher ucs = OS.getContextSwitcher();
-      OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-          "Handling CallType " + ct + " from " +
-              ucs.getThreadName());
+      NclosLogger.logDebug("CALL_TYPE:{3};CONTEXT_SWITCHER:{4};",
+          ct.toString().toLowerCase(), ucs.getThreadName());
 
       // Main run loop.
       switch (ct) {
@@ -352,8 +338,7 @@ public class Kernel implements Stoppable, Runnable, Device {
 
       // Start the new currentlyRunning.
       PCB newCurRun = getCurrentlyRunningSafe();
-      OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-          "New currentlyRunning: " + newCurRun.getThreadName());
+      NclosLogger.logDebug("NEW_CUR_RUN:{3};", newCurRun.getThreadName());
       newCurRun.start();
 
       // If contextSwitcher is not the new curRun, start the contextSwitcher.

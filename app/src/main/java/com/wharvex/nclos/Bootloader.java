@@ -3,7 +3,6 @@ package com.wharvex.nclos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
 
 public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
   private final Semaphore semaphore;
@@ -45,8 +44,7 @@ public class Bootloader implements UnprivilegedContextSwitcher, Runnable {
 
   @Override
   public void run() {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Bootloader thread started");
+    NclosLogger.logDebugThread(ThreadLifeStage.STARTING);
     OS.startup(this, testChoice);
   }
 }
