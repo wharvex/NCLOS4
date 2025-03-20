@@ -146,32 +146,24 @@ public class OS {
     // The following is the logic that stops the context switcher if needed.
     // We can't have this in the sync block because then the cs would stop
     // while holding the lock.
-    // TODO: Make this more readable.
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Checking if we should stop the contextSwitcher");
+    // TODO: Reduce nesting here.
+    NclosLogger.logDebug("SHOULD_STOP_AFTER_CONTEXT_SWITCH_CHECK");
     if (cs instanceof UserlandProcess) {
-      OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-          "OS.contextSwitcher is a UserlandProcess");
-      ((UserlandProcess) cs).preSetStopRequested(false);
-      if (((UserlandProcess) cs).getShouldStopAfterContextSwitch()) {
-        OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-            "This is where a UserlandProcess stops due to timeout.");
-        ((UserlandProcess) cs).setShouldStopAfterContextSwitch(false);
+      UserlandProcess csup = (UserlandProcess) cs;
+      csup.preSetStopRequested(false);
+      if (csup.getShouldStopAfterContextSwitch()) {
+        csup.setShouldStopAfterContextSwitch(false);
+        NclosLogger.logDebugThread(ThreadLifeStage.STOPPING,
+            cs.getThreadName());
         cs.stop();
-      } else if (((UserlandProcess) cs).getShouldStopAfterContextSwitch() ==
+      } else if (csup.getShouldStopAfterContextSwitch() ==
           null) {
-        // TODO: This might never happen
-        OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-            "OS.contextSwitcher.shouldStopAfterContextSwitch has not been " +
-                "set yet; continuing...");
+        NclosLogger.logDebug("SHOULD_STOP_AFTER_CONTEXT_SWITCH_NULL");
       } else {
-        OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-            "OS.contextSwitcher.shouldStopAfterContextSwitch is false; " +
-                "continuing...");
+        NclosLogger.logDebug("SHOULD_STOP_AFTER_CONTEXT_SWITCH_FALSE");
       }
     } else {
-      OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-          "OS.contextSwitcher is not a UserlandProcess; continuing...");
+      NclosLogger.logDebug("CONTEXT_SWITCHER_NOT_USERLAND_PROCESS");
     }
   }
 
@@ -182,10 +174,7 @@ public class OS {
     // Throw an exception if any of the new params are null and log the
     // exception.
     if (Arrays.stream(newParams).anyMatch(Objects::isNull)) {
-      throw new RuntimeException(
-          OutputHelper.getInstance().logToAllAndReturnMessage(
-              "Cannot add any null elements to params.",
-              Level.SEVERE));
+      throw new RuntimeException(NclosLogger.logError("NULL_PARAMS").get());
     }
 
     // Add new params to params.
@@ -203,9 +192,7 @@ public class OS {
     // exception.
     if (idx < 0 || idx >= PARAMS.size()) {
       throw new RuntimeException(
-          OutputHelper.getInstance().logToAllAndReturnMessage(
-              "Param index " + idx + " out of range.",
-              Level.SEVERE));
+          NclosLogger.logError("PARAM_INDEX_OUT_OF_RANGE:{}").get());
     }
 
     // Get the param.

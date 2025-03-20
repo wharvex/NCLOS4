@@ -9,6 +9,14 @@ import java.util.stream.Stream;
 public class NclosLogger {
   private static final String messageBase =
       "THREAD:{0};PREV_FRAME.CLASS:{1};PREV_FRAME.METHOD:{2};";
+  private static final String noteExtension = "NOTE:{3};";
+  private static final String noteExtension2 = "NOTE:{4};";
+  private static final String syncExtension = "SYNC_STAGE:{3};";
+  private static final String threadExtension = "THREAD_STAGE:{3};";
+  private static final String syncWithNoteExtension = syncExtension +
+      noteExtension2;
+  private static final String threadWithNoteExtension = threadExtension +
+      noteExtension2;
 
   private static LogRecord getLogRecord(Level level, String message,
                                         Object... params) {
@@ -34,9 +42,9 @@ public class NclosLogger {
     return ret;
   }
 
-  public static void logDebug(String message, Object... params) {
+  public static void logDebug(Object param) {
     OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, message, params));
+        .log(getLogRecord(Level.INFO, noteExtension, param));
   }
 
   public static void logDebug() {
@@ -44,38 +52,36 @@ public class NclosLogger {
         .log(getLogRecord(Level.INFO, ""));
   }
 
-  public static void logMain(String message, Object... params) {
+  public static void logMain(Object param) {
     OutputHelper.getInstance().getMainOutputLogger()
-        .log(getLogRecord(Level.INFO, message, params));
+        .log(getLogRecord(Level.INFO, noteExtension, param));
     OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, message, params));
+        .log(getLogRecord(Level.INFO, noteExtension, param));
   }
 
   public static void logDebugSync(ExecutionPathStage stage) {
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        "SYNC_STAGE:{3};", stage.toString().toLowerCase()));
+        syncExtension, stage));
   }
 
   public static void logDebugSync(ExecutionPathStage stage, Object note) {
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        "SYNC_STAGE:{3};NOTE:{4}", MiscHelper.getLogStringLower(stage),
-        MiscHelper.getLogStringLower(note)));
+        syncWithNoteExtension, stage, note));
   }
 
   public static void logDebugThread(ThreadLifeStage stage) {
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        "THREAD_STAGE:{3};", MiscHelper.getLogStringLower(stage)));
+        threadExtension, stage));
   }
 
-  public static void logDebugThread(ThreadLifeStage stage,
-                                    String targetThreadName) {
+  public static void logDebugThread(ThreadLifeStage stage, Object note) {
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        "{3}:{4};", String.valueOf(stage), targetThreadName));
+        threadWithNoteExtension, stage, note));
   }
 
-  public static Supplier<String> logError(String message, Object... params) {
+  public static Supplier<String> logError(Object param) {
     return () -> {
-      var record = getLogRecord(Level.SEVERE, message, params);
+      var record = getLogRecord(Level.SEVERE, noteExtension, param);
       OutputHelper.getInstance().getDebugLogger().log(record);
       OutputHelper.getInstance().getMainOutputLogger().log(record);
       return MessageFormat.format(record.getMessage(),

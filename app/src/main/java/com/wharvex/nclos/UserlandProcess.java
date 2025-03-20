@@ -124,6 +124,8 @@ public abstract class UserlandProcess
     shouldStopFromTimeout = isRequested;
   }
 
+  // todo: I don't like this way of naming methods because it's not obvious
+  //  what the "pre" applies to.
   public void preSetStopRequested(boolean isRequested) {
     OutputHelper.getInstance().getDebugLogger()
         .log(Level.INFO,
@@ -178,6 +180,7 @@ public abstract class UserlandProcess
     return debugPid;
   }
 
+  // todo: Why is this a capital-B boolean??
   public Boolean getShouldStopAfterContextSwitch() {
     return shouldStopAfterContextSwitch;
   }
