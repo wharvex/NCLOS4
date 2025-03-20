@@ -112,6 +112,8 @@ public abstract class UserlandProcess
     return shouldStopFromTimeout;
   }
 
+  // todo: make separate "unsetStopRequested" method instead of passing in a
+  //  boolean?
   public synchronized void setStopRequested(boolean isRequested) {
     OutputHelper.getInstance()
         .getDebugLogger()

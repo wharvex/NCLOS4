@@ -11,18 +11,15 @@ public class MiscHelper {
   public static void enforceNonNullNonEmptyNonBlankString(String s) {
     if (s == null || s.isBlank()) {
       throw new RuntimeException(
-          OutputHelper.getInstance().logToAllAndReturnMessage(
-              "Expected non-null, non-empty, non-blank string.",
-              Level.SEVERE));
+          NclosLogger.logError("NULL_OR_BLANK_STRING").get());
     }
   }
 
   public static void enforceArrayLength(Object[] arr, int len) {
     if (arr.length != len) {
       throw new RuntimeException(
-          OutputHelper.getInstance().logToAllAndReturnMessage(
-              "Expected array length to be " + len + " but was "
-                  + arr.length + ".", Level.SEVERE));
+          NclosLogger.logError("Array_length_expected:{0};actual:{1};", len,
+              arr.length).get());
     }
   }
 
@@ -74,5 +71,9 @@ public class MiscHelper {
       result[i] = s.substring(start, end);
     }
     return result;
+  }
+
+  public static String getLogStringLower(Object o) {
+    return String.valueOf(o).toLowerCase();
   }
 }

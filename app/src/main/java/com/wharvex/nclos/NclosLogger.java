@@ -56,15 +56,21 @@ public class NclosLogger {
         "SYNC_STAGE:{3};", stage.toString().toLowerCase()));
   }
 
+  public static void logDebugSync(ExecutionPathStage stage, Object note) {
+    OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
+        "SYNC_STAGE:{3};NOTE:{4}", MiscHelper.getLogStringLower(stage),
+        MiscHelper.getLogStringLower(note)));
+  }
+
   public static void logDebugThread(ThreadLifeStage stage) {
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        "THREAD_STAGE:{3};", stage.toString().toLowerCase()));
+        "THREAD_STAGE:{3};", MiscHelper.getLogStringLower(stage)));
   }
 
   public static void logDebugThread(ThreadLifeStage stage,
                                     String targetThreadName) {
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        "{3}:{4};", stage.toString(), targetThreadName));
+        "{3}:{4};", String.valueOf(stage), targetThreadName));
   }
 
   public static Supplier<String> logError(String message, Object... params) {

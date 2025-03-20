@@ -70,9 +70,7 @@ public class OS {
    * @return
    */
   private static Kernel getKernel() {
-    Objects.requireNonNull(kernel,
-        OutputHelper.getInstance().getErrorMessageSupplier(
-            "Tried to get OS.kernel but it was null."));
+    Objects.requireNonNull(kernel, NclosLogger.logError("KERNEL_NULL"));
     return kernel;
   }
 
@@ -119,15 +117,13 @@ public class OS {
                                    CallType callType,
                                    Consumer<Object> retSaver,
                                    Object... params) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "About to enter synchronized block for " + cs +
-            " with call type " + callType);
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER,
+        callType + "/" + cs.getThreadName());
 
     // TODO: Move this synchronized block into the UCS itself.
     synchronized (cs) {
-      OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-          "Entered synchronized block for " + cs + " with call type " +
-              callType);
+      NclosLogger.logDebugSync(ExecutionPathStage.IN,
+          callType + "/" + cs.getThreadName());
 
       // Store the Runnable whose thread is calling this method.
       setContextSwitcher(cs);
@@ -144,9 +140,8 @@ public class OS {
       // Save the value returned from the Kernel to the context switcher.
       getRetVal().ifPresent(rv -> cs.setContextSwitchRet(retSaver, rv));
     }
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Left synchronized block for " +
-            cs + " with call type " + callType);
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT,
+        callType + "/" + cs.getThreadName());
 
     // The following is the logic that stops the context switcher if needed.
     // We can't have this in the sync block because then the cs would stop
