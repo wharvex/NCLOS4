@@ -192,7 +192,7 @@ public class OS {
     // exception.
     if (idx < 0 || idx >= PARAMS.size()) {
       throw new RuntimeException(
-          NclosLogger.logError("PARAM_INDEX_OUT_OF_RANGE:{}").get());
+          NclosLogger.logError("param index out of range -> " + idx).get());
     }
 
     // Get the param.
@@ -201,8 +201,7 @@ public class OS {
     // Throw an exception if the param is null and log the exception.
     Objects.requireNonNull(
         param,
-        OutputHelper.getInstance().getErrorMessageSupplier(
-            "Tried to get param at index " + idx + " but it was null."));
+        NclosLogger.logError("param at index " + idx + " was null"));
 
     // Return the param.
     return param;
@@ -247,35 +246,29 @@ public class OS {
    * @param rv The kernelland function return value.
    */
   public static void setRetValOnOS(Object rv) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Setting OS.retVal to " + rv);
+    NclosLogger.logDebug("Setting OS.retVal to " + rv);
     retVal = rv;
   }
 
   public static UnprivilegedContextSwitcher getContextSwitcher() {
     Objects.requireNonNull(
         contextSwitcher,
-        OutputHelper.getInstance().getErrorMessageSupplier(
-            "Tried to get OS.contextSwitcher but it was null."));
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "OS.contextSwitcher is " + contextSwitcher.getThreadName());
+        NclosLogger.logError("contextSwitcher is null"));
+    NclosLogger.logDebug("contextSwitcher is " + contextSwitcher);
     return contextSwitcher;
   }
 
   public static void setContextSwitcher(UnprivilegedContextSwitcher cs) {
     Objects.requireNonNull(
         cs,
-        OutputHelper.getInstance().getErrorMessageSupplier(
-            "Cannot set OS.contextSwitcher to null"));
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Setting OS.contextSwitcher to " + cs.getThreadName());
+        NclosLogger.logError("cannot set OS.contextSwitcher to null"));
+    NclosLogger.logDebug("Setting OS.contextSwitcher to " + cs);
     contextSwitcher = cs;
   }
 
   public static CallType getCallType() {
     Objects.requireNonNull(callType,
-        OutputHelper.getInstance().getErrorMessageSupplier(
-            "Tried to get OS.callType but it was null"));
+        NclosLogger.logError("OS.callType is null"));
     return callType;
   }
 
@@ -291,8 +284,8 @@ public class OS {
    * @param ct
    */
   public static void setCallType(CallType ct) {
-    Objects.requireNonNull(ct, OutputHelper.getInstance()
-        .getErrorMessageSupplier("Cannot set OS.callType to null"));
+    Objects.requireNonNull(ct,
+        NclosLogger.logError("cannot set OS.callType to null"));
     callType = ct;
   }
 
@@ -333,8 +326,7 @@ public class OS {
    * @param messages
    */
   public static void setMessages(List<KernelMessage> messages) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Setting OS messages to " + messages);
+    NclosLogger.logDebug("Setting OS.messages to " + messages);
     OS.messages = messages;
   }
 

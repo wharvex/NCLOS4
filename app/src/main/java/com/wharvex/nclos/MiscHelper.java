@@ -17,9 +17,9 @@ public class MiscHelper {
 
   public static void enforceArrayLength(Object[] arr, int len) {
     if (arr.length != len) {
-      throw new RuntimeException(
-          NclosLogger.logError("Array_length_expected:{0};actual:{1};", len,
-              arr.length).get());
+      throw new RuntimeException(NclosLogger.logError(
+              "array len expected -> " + len + ", actual -> " + arr.length)
+          .get());
     }
   }
 

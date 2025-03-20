@@ -3,7 +3,6 @@ package com.wharvex.nclos;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
 
 public class FakeFileSystem implements Device {
   private final RandomAccessFile[] files;
@@ -49,7 +48,7 @@ public class FakeFileSystem implements Device {
       return new RandomAccessFile(filename, "rw");
     } catch (FileNotFoundException e) {
       throw new RuntimeException(
-          NclosLogger.logError("FILE_NOT_FOUND:{3};", filename).get());
+          NclosLogger.logError("file not found -> " + filename).get());
     }
   }
 

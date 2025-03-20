@@ -131,10 +131,9 @@ public class PCB {
    * Only the Timer thread should use this method.
    */
   public void stop() {
+    NclosLogger.logDebugThread(ThreadLifeStage.STOPPING, getThreadName());
     getUserlandProcess().requestStop();
     getUserlandProcess().waitUntilStoppedByRequest();
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Stopped " + getThreadName());
     incrementTimeoutsCounter();
   }
 

@@ -39,7 +39,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   public int[] getDeviceFromPidToDevice(int pid) {
     if (!getPidToDevice().containsKey(pid)) {
       throw new RuntimeException(
-          NclosLogger.logError("PID_NOT_FOUND:{3};", pid).get());
+          NclosLogger.logError("pid not found -> " + pid).get());
     }
     return getPidToDevice().get(pid);
   }
@@ -105,7 +105,7 @@ public class Kernel implements Stoppable, Runnable, Device {
   private PCB createPCB(UserlandProcess up, Scheduler.PriorityType pt) {
     // Create a new PCB.
     PCB pcb = new PCB(up, pt);
-    NclosLogger.logDebug("PCB_CREATED:{3};", pcb.getThreadName());
+    NclosLogger.logDebug("pcb created -> " + pcb.getThreadName());
 
     // Add newly created PCB to the hashmap that finds a PCB by its pid.
     getScheduler().addToPcbByPidComplete(pcb, pcb.getPid());
@@ -175,7 +175,8 @@ public class Kernel implements Stoppable, Runnable, Device {
                 getScheduler().getPidByName(
                     getCurrentlyRunningSafe()
                         .getThreadName()));
-    NclosLogger.logDebug("PCB_WAITING_FOR_MESSAGE:{3}", pcb.getThreadName());
+    NclosLogger.logDebug(
+        "PCB waiting for message -> " + pcb.getThreadName());
 
     // Add message waiter PCB to the waitingRecipients queue.
     getScheduler().addToWaitingRecipients(pcb);
@@ -220,8 +221,9 @@ public class Kernel implements Stoppable, Runnable, Device {
   private void allocateMemory() {
     // Get Allocation Size In Bytes.
     int allocationSizeInBytes = (int) OS.getParam(0);
-    NclosLogger.logDebug("ALLOCATION_SIZE:{3};REQUESTER:{4};",
-        allocationSizeInBytes, getCurrentlyRunningSafe().getThreadName());
+    NclosLogger.logDebug(
+        "allocation size -> " + allocationSizeInBytes + " // requester -> " +
+            getCurrentlyRunningSafe().getThreadName());
 
     // Enforce that ASIB is a multiple of pageSize.
     if (allocationSizeInBytes % OS.getPageSize() != 0) {
@@ -320,8 +322,9 @@ public class Kernel implements Stoppable, Runnable, Device {
       // Announce the call type and context switcher.
       var ct = OS.getCallType();
       UnprivilegedContextSwitcher ucs = OS.getContextSwitcher();
-      NclosLogger.logDebug("CALL_TYPE:{3};CONTEXT_SWITCHER:{4};",
-          ct.toString().toLowerCase(), ucs.getThreadName());
+      NclosLogger.logDebug(
+          "call type -> " + ct + " // context switcher -> " +
+              ucs.getThreadName());
 
       // Main run loop.
       switch (ct) {
@@ -338,7 +341,8 @@ public class Kernel implements Stoppable, Runnable, Device {
 
       // Start the new currentlyRunning.
       PCB newCurRun = getCurrentlyRunningSafe();
-      NclosLogger.logDebug("NEW_CUR_RUN:{3};", newCurRun.getThreadName());
+      NclosLogger.logDebugThread(ThreadLifeStage.STARTING,
+          newCurRun.getThreadName());
       newCurRun.start();
 
       // If contextSwitcher is not the new curRun, start the contextSwitcher.

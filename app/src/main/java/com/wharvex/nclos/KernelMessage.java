@@ -40,7 +40,7 @@ public class KernelMessage {
   public Integer getSenderPid() {
     if (senderPid == null) {
       throw new RuntimeException(
-          NclosLogger.logError("SENDER_PID_NULL").get());
+          NclosLogger.logError("sender pid null").get());
     }
     return senderPid;
   }

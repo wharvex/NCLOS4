@@ -21,31 +21,27 @@ public class Pong extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
-          "Hello from Pong " + getDebugPid() + " (times printed: " + (++i) +
-              ")\nPong waiting for message " + (getMessages().size() + 1));
+      NclosLogger.logMain(
+          "hello from Pong " + getDebugPid() + ", i=" + (++i) +
+              ", waiting for message " + (getMessages().size() + 1));
       OS.waitForMessage(this);
       addAllToMessages(OS.getMessagesAndClear());
       IntStream.range(0, getMessages().size())
           .forEach(
               j ->
-                  OutputHelper.getInstance().getMainOutputLogger()
-                      .log(Level.INFO, "Pong's received message " +
-                          (j + 1) + " has content -- " +
-                          getMessages().get(j).getMessageContentString()));
+                  NclosLogger.logMain("Pong's received message " +
+                      (j + 1) + " has content -> " +
+                      getMessages().get(j).getMessageContentString()));
 
       int finalI = i;
       getPingPid()
           .ifPresent(
               p -> {
-                OutputHelper.getInstance().getMainOutputLogger()
-                    .log(Level.INFO, "Pong sees ping's pid as: " + p);
+                NclosLogger.logMain("Pong sees ping's pid as: " + p);
                 String messageContent =
                     "baba booey " + finalI + " from pong";
-                OutputHelper.getInstance().getMainOutputLogger()
-                    .log(Level.INFO,
-                        "Pong sending message to ping with content: " +
-                            messageContent);
+                NclosLogger.logMain("Pong sending message to ping with " +
+                    "content: " + messageContent);
                 OS.sendMessage(this,
                     new KernelMessage(p, 2, messageContent));
               });

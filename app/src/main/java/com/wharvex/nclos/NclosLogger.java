@@ -42,9 +42,10 @@ public class NclosLogger {
     return ret;
   }
 
-  public static void logDebug(Object param) {
+  public static void logDebug(Object noteParam) {
+    validateNoteParam(noteParam);
     OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, noteExtension, param));
+        .log(getLogRecord(Level.INFO, noteExtension, noteParam));
   }
 
   public static void logDebug() {
@@ -52,11 +53,12 @@ public class NclosLogger {
         .log(getLogRecord(Level.INFO, ""));
   }
 
-  public static void logMain(Object param) {
+  public static void logMain(Object noteParam) {
+    validateNoteParam(noteParam);
     OutputHelper.getInstance().getMainOutputLogger()
-        .log(getLogRecord(Level.INFO, noteExtension, param));
+        .log(getLogRecord(Level.INFO, noteExtension, noteParam));
     OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, noteExtension, param));
+        .log(getLogRecord(Level.INFO, noteExtension, noteParam));
   }
 
   public static void logDebugSync(ExecutionPathStage stage) {
@@ -64,9 +66,11 @@ public class NclosLogger {
         syncExtension, stage));
   }
 
-  public static void logDebugSync(ExecutionPathStage stage, Object note) {
+  public static void logDebugSync(ExecutionPathStage stage,
+                                  Object noteParam) {
+    validateNoteParam(noteParam);
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        syncWithNoteExtension, stage, note));
+        syncWithNoteExtension, stage, noteParam));
   }
 
   public static void logDebugThread(ThreadLifeStage stage) {
@@ -74,18 +78,29 @@ public class NclosLogger {
         threadExtension, stage));
   }
 
-  public static void logDebugThread(ThreadLifeStage stage, Object note) {
+  public static void logDebugThread(ThreadLifeStage stage,
+                                    Object noteParam) {
+    validateNoteParam(noteParam);
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        threadWithNoteExtension, stage, note));
+        threadWithNoteExtension, stage, noteParam));
   }
 
-  public static Supplier<String> logError(Object param) {
+  public static Supplier<String> logError(Object noteParam) {
+    validateNoteParam(noteParam);
     return () -> {
-      var record = getLogRecord(Level.SEVERE, noteExtension, param);
+      var record = getLogRecord(Level.SEVERE, noteExtension, noteParam);
       OutputHelper.getInstance().getDebugLogger().log(record);
       OutputHelper.getInstance().getMainOutputLogger().log(record);
       return MessageFormat.format(record.getMessage(),
           record.getParameters());
     };
+  }
+
+  private static void validateNoteParam(Object noteParam) {
+    String noteParamStr = String.valueOf(noteParam);
+    if (noteParamStr.contains(";") || noteParamStr.contains(":")) {
+      throw new IllegalArgumentException(
+          "noteParam cannot contain ';' or ':' -> " + noteParamStr);
+    }
   }
 }
