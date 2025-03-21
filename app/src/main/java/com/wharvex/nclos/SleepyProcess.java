@@ -12,9 +12,7 @@ public class SleepyProcess extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
-          "Hello from Sleepy " + getDebugPid() + " (times printed: " +
-              (++i) + ")");
+      NclosLogger.logMain("i = " + (++i));
       ThreadHelper.threadSleep(1000);
       cooperate();
     }

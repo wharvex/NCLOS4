@@ -32,64 +32,39 @@ public class VirtMemTestB extends UserlandProcess {
     byte writeByte = 33;
     int virtualAddress = -1;
     while (true) {
-      OutputHelper.getInstance()
-          .getMainOutputLogger()
-          .log(Level.INFO,
-              "VirtMemTestB says: "
-                  + getDebugPid()
-                  + " (times printed: "
-                  + (++i)
-                  + ")");
-      // TODO: This is weird. Make it better.
+      NclosLogger.logDebug("i = " + (++i));
+      // TODO: Make this user's choice
       switch (i) {
         case 1:
           // Do nothing.
-          OutputHelper.getInstance()
-              .getMainOutputLogger()
-              .log(Level.INFO,
-                  "VirtMemTestB says: I'm doing nothing for now.");
+          NclosLogger.logMain("doing nothing for now.");
           break;
         case 2:
           // Do nothing again.
-          OutputHelper.getInstance()
-              .getMainOutputLogger()
-              .log(Level.INFO,
-                  "VirtMemTestB says: I'm still doing nothing for now.");
+          NclosLogger.logMain("still doing nothing for now.");
           break;
         case 3:
           // Lazy allocate an unreasonable amount, so we'll need to steal.
-          OutputHelper.getInstance()
-              .getMainOutputLogger()
-              .log(Level.INFO,
-                  "VirtMemTestB says: I'm attempting to allocate "
-                      + allocationSizeInPages
-                      + " pages of memory.");
+          NclosLogger.logMain(
+              "Attempting to allocate " + allocationSizeInPages +
+                  " pages of memory.");
           OS.allocateMemory(
               this,
               idx -> allocationIndices.add((int) idx),
               allocationSizeInPages * OS.getPageSize());
           virtualAddress = allocationIndices.getFirst();
           if (virtualAddress >= 0) {
-            OutputHelper.getInstance()
-                .getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestB says: successfully allocated "
-                        + allocationSizeInPages
-                        + " pages of memory starting at virtual address "
-                        + virtualAddress);
+            NclosLogger.logMain(
+                "successfully allocated " + allocationSizeInPages +
+                    " pages of memory starting at virtual address " +
+                    virtualAddress);
           } else {
-            OutputHelper.getInstance()
-                .getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestB says: failed to allocate.");
+            NclosLogger.logMain("failed to allocate.");
           }
           break;
 
         default:
-          OutputHelper.getInstance()
-              .getMainOutputLogger()
-              .log(Level.INFO,
-                  "VirtMemTestB says: done testing.");
+          NclosLogger.logMain("done testing.");
       }
       ThreadHelper.threadSleep(1000);
       cooperate();

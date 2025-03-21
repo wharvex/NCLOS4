@@ -12,9 +12,7 @@ public class UnsleepyProcess extends UserlandProcess {
   void main() {
     int i = 0;
     while (true) {
-      OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
-          "Hello from Unsleepy " + getDebugPid() + " (times printed: " +
-              (++i) + ")");
+      NclosLogger.logDebug("i = " + (++i));
       cooperate();
       ThreadHelper.threadSleep(1000);
     }

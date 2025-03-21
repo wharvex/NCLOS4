@@ -32,85 +32,58 @@ public class VirtMemTestA extends UserlandProcess {
     byte writeByte = 33;
     int virtualAddress = -1;
     while (true) {
-      OutputHelper.getInstance().getMainOutputLogger()
-          .log(Level.INFO, "VirtMemTestA says: " +
-              getDebugPid() + " (times printed: " + (++i) + ")");
+      NclosLogger.logDebug("i = " + (++i));
       switch (i) {
         case 1:
           // Create swapfile.
-          OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
-              "VirtMemTestA says: I'm creating/opening the swapfile.");
+          NclosLogger.logDebug("Creating/opening swapfile.");
           OS.open(this, id -> this.addToFileDescriptors((int) id),
               "file swap");
           break;
         case 2:
           // Print swapfile FD.
           // TODO: Error handling.
-          OutputHelper.getInstance().getMainOutputLogger().log(Level.INFO,
-              "VirtMemTestA says: Swapfile FD: " +
-                  getFromFileDescriptors(0));
+          NclosLogger.logMain("Swapfile FD -> " + getFromFileDescriptors(0));
           break;
         case 3:
           // Lazy allocate a reasonable amount.
-          OutputHelper.getInstance().getMainOutputLogger()
-              .log(Level.INFO,
-                  "VirtMemTestA says: attempting to allocate "
-                      + allocationSizeInPages
-                      + " pages of memory.");
+          NclosLogger.logMain(
+              "Attempting to allocate " + allocationSizeInPages +
+                  " pages of memory.");
           OS.allocateMemory(
               this,
               idx -> allocationIndices.add((int) idx),
               allocationSizeInPages * OS.getPageSize());
           virtualAddress = allocationIndices.getFirst();
           if (virtualAddress >= 0) {
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: successfully allocated "
-                        + allocationSizeInPages
-                        + " pages of memory starting at virtual address "
-                        + virtualAddress);
+            NclosLogger.logMain(
+                "successfully allocated " + allocationSizeInPages +
+                    " pages of memory starting at virtual address " +
+                    virtualAddress);
           } else {
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: failed to allocate.");
+            NclosLogger.logMain("failed to allocate.");
           }
           break;
         case 4:
           // Write.
           if (virtualAddress >= 0) {
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: attempting to write "
-                        + writeByte
-                        + " to virtual address "
-                        + virtualAddress);
+            NclosLogger.logMain("attempting to write " + writeByte +
+                " to virtual address " + virtualAddress);
             write(virtualAddress, writeByte);
           } else {
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: not attempting case 4 write due to" +
-                        " case 3 allocation failure.");
+            NclosLogger.logMain("not attempting write");
           }
           break;
         case 5:
           // Read.
           if (virtualAddress >= 0) {
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: attempting to read from virtual address "
-                        + virtualAddress);
+            NclosLogger.logMain("attempting to read from virtual address "
+                + virtualAddress);
             byte readByte = read(virtualAddress);
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: read "
-                        + readByte
-                        + " from virtual address "
-                        + virtualAddress + "; expected " + writeByte);
+            NclosLogger.logMain("read " + readByte + " from virtual address "
+                + virtualAddress + ", expected " + writeByte);
           } else {
-            OutputHelper.getInstance().getMainOutputLogger()
-                .log(Level.INFO,
-                    "VirtMemTestA says: not attempting case 5 read due to" +
-                        " case 3 allocation failure.");
+            NclosLogger.logMain("not attempting read");
           }
           break;
         case 6:
@@ -121,9 +94,7 @@ public class VirtMemTestA extends UserlandProcess {
           break;
 
         default:
-          OutputHelper.getInstance().getMainOutputLogger()
-              .log(Level.INFO,
-                  "VirtMemTestA says: done testing.");
+          NclosLogger.logMain("done testing.");
       }
       ThreadHelper.threadSleep(1000);
       cooperate();

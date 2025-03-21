@@ -22,7 +22,7 @@ public class NclosLogger {
                                         Object... params) {
     // Create the record, get the frames.
     var ret = new LogRecord(level, messageBase + message);
-    var frames = new TwoStackFrameWrappers(4, 5);
+    var frames = new TwoStackFrameWrappers(5, 6);
 
     // Set the record's stack "source" with data from the first frame.
     ret.setSourceClassName(frames.getFirstClassName());

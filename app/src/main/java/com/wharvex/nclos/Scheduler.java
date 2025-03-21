@@ -94,13 +94,14 @@ public class Scheduler {
         getWaitingRecipients().stream()
             .filter(pcb -> !getWaitingMessagesForPCB(pcb).isEmpty())
             .toList();
-    NclosLogger.logDebug("Initial contents of doneWaiters: " + doneWaiters);
+    NclosLogger.logDebug(
+        "Initial contents of doneWaiters -> " + doneWaiters);
 
     // Remove from waitingRecipients the message-waiters who have messages
     // now.
     getWaitingRecipients().removeAll(doneWaiters);
     NclosLogger.logDebug("Contents of waitingRecipients after removing " +
-        "doneWaiters: " + getWaitingRecipients());
+        "doneWaiters -> " + getWaitingRecipients());
 
     // Add each doneWaiter's messages to its PCB.
     doneWaiters =
@@ -109,7 +110,7 @@ public class Scheduler {
                 getWaitingMessagesForPCB(pcb)))
             .toList();
     NclosLogger.logDebug(
-        "Contents of doneWaiters after adding messages to them: " +
+        "Contents of doneWaiters after adding messages to them -> " +
             doneWaiters);
 
     // Add all the doneWaiters to the waiting (readyToRun) queue.
@@ -186,14 +187,14 @@ public class Scheduler {
     getWQ().add(pcb);
     NclosLogger.logDebug("Added " + pcb.getThreadName() + " to wq");
     getWQ().forEach(NclosLogger::logDebug);
-    NclosLogger.logDebug("Size of wq: " + getWQ().size());
+    NclosLogger.logDebug("Size of wq -> " + getWQ().size());
   }
 
   private void removeFromWQ(int idx) {
     PCB removed = getWQ().remove(idx);
     NclosLogger.logDebug("Removed " + removed.getThreadName() + " from wq");
     getWQ().forEach(NclosLogger::logDebug);
-    NclosLogger.logDebug("Size of wq: " + getWQ().size());
+    NclosLogger.logDebug("Size of wq -> " + getWQ().size());
   }
 
   private List<PCB> getWQ() {

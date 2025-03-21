@@ -45,55 +45,43 @@ public abstract class UserlandProcess
   }
 
   public static byte preGetFromPhysicalMemory(int idx) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm about to enter getFromPhysicalMemory");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     var ret = getFromPhysicalMemory(idx);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I have left getFromPhysicalMemory");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
     return ret;
   }
 
   public static void preSetOnPhysicalMemory(int idx, byte val) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm about to enter setOnPhysicalMemory");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     setOnPhysicalMemory(idx, val);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I have left setOnPhysicalMemory");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
   }
 
+  // todo: define z, p, v, f
   private static synchronized int getFromTlb(int vOrP, int zOrF) {
     var ret = getTlb()[vOrP][zOrF];
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "TLB[" + vOrP + "][" + zOrF + "] is " + ret);
+    NclosLogger.logDebug(
+        "Getting TLB[" + vOrP + "][" + zOrF + "], which is " + ret);
     return ret;
   }
 
   private static synchronized void setOnTlb(int vOrP, int zOrF, int val) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "Setting TLB[" + vOrP + "][" + zOrF + "] to " + val);
+    NclosLogger.logDebug(
+        "Setting TLB[" + vOrP + "][" + zOrF + "] to " + val);
     getTlb()[vOrP][zOrF] = val;
   }
 
   public static int preGetFromTlb(int vOrP, int zOrF) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "UP says: I'm about to enter getFromTlb");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     var ret = getFromTlb(vOrP, zOrF);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "UP says: I have left getFromTlb");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
     return ret;
   }
 
   public static synchronized void preSetOnTlb(int vOrP, int zOrF, int val) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "UP says: I'm about to enter setOnTlb");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     setOnTlb(vOrP, zOrF, val);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "UP says: I have left setOnTlb");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
   }
 
   /**
@@ -104,52 +92,36 @@ public abstract class UserlandProcess
   }
 
   public synchronized boolean isStopRequested() {
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in isStopRequested\nshouldStopFromTimeout is " +
-                shouldStopFromTimeout);
+    NclosLogger.logDebugSync(ExecutionPathStage.IN,
+        "shouldStopFromTimeout is " + shouldStopFromTimeout);
     return shouldStopFromTimeout;
   }
 
   // todo: make separate "unsetStopRequested" method instead of passing in a
   //  boolean?
   public synchronized void setStopRequested(boolean isRequested) {
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in setStopRequested\n" +
-                "setting shouldStopFromTimeout to " +
-                isRequested);
+    NclosLogger.logDebugSync(ExecutionPathStage.IN,
+        "setting shouldStopFromTimeout to " + isRequested);
     shouldStopFromTimeout = isRequested;
   }
 
   // todo: I don't like this way of naming methods because it's not obvious
   //  what the "pre" applies to.
   public void preSetStopRequested(boolean isRequested) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm about to enter setStopRequested");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     setStopRequested(isRequested);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I have left setStopRequested");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
   }
 
   public boolean preIsStopRequested() {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm about to enter isStopRequested");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     var ret = isStopRequested();
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I have left isStopRequested");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
     return ret;
   }
 
   public void cooperate() {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "UP says: I'm in cooperate");
+    NclosLogger.logDebug();
     if (preIsStopRequested()) {
       OS.switchProcess(this);
     }
@@ -167,9 +139,7 @@ public abstract class UserlandProcess
 
   @Override
   public void run() {
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO, "UP says: I'm just getting started.");
+    NclosLogger.logDebugThread(ThreadLifeStage.STARTING);
     stop();
     main();
   }
@@ -187,11 +157,8 @@ public abstract class UserlandProcess
 
   public void setShouldStopAfterContextSwitch(
       boolean shouldStopAfterContextSwitch) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in setShouldStopAfterContextSwitch\n" +
-                "Setting shouldStopAfterContextSwitch to " +
-                shouldStopAfterContextSwitch);
+    NclosLogger.logDebug("Setting shouldStopAfterContextSwitch to " +
+        shouldStopAfterContextSwitch);
     this.shouldStopAfterContextSwitch = shouldStopAfterContextSwitch;
   }
 
@@ -213,38 +180,22 @@ public abstract class UserlandProcess
   //  Not a big fan of sleep in a loop.
   public void waitUntilStoppedByRequest() {
     while (preIsStopRequested()) {
-      OutputHelper.getInstance().getDebugLogger()
-          .log(Level.INFO,
-              "UP says: I'm in waitUntilStoppedByRequest\n" +
-                  "Waiting for " + getThreadName() +
-                  " to stop from request");
+      NclosLogger.logDebug("Waiting for " + getThreadName() + " to stop");
       ThreadHelper.threadSleep(10);
     }
   }
 
   private int getPhysAddr(int virtAddr) {
     int virtualPageNumber = virtAddr / OS.getPageSize();
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in getPhysAddr\n" +
-                "virtualPageNumber is " + virtualPageNumber);
+    NclosLogger.logDebug("virtualPageNumber is " + virtualPageNumber);
     int pageOffset = virtAddr % OS.getPageSize();
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in getPhysAddr\n" +
-                "pageOffset is " + pageOffset);
+    NclosLogger.logDebug("pageOffset is " + pageOffset);
     int physicalPageNumber =
         matchAndReturnPhys(virtualPageNumber).orElse(-1);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in getPhysAddr\n" +
-                "physicalPageNumber is " + physicalPageNumber);
+    NclosLogger.logDebug("physicalPageNumber is " + physicalPageNumber);
     int physicalAddress =
         (physicalPageNumber * OS.getPageSize()) + pageOffset;
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO,
-            "UP says: I'm in getPhysAddr\n" +
-                "physicalAddress is " + physicalAddress);
+    NclosLogger.logDebug("physicalAddress is " + physicalAddress);
     return physicalAddress;
   }
 

@@ -28,8 +28,7 @@ public interface UnprivilegedContextSwitcher extends Stoppable {
 
   default void addToCsRets(Object ret) {
     getCsRets().add(ret);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Saved " + ret + " to rets of " + getThreadName());
+    NclosLogger.logDebug("Saved " + ret + " to rets of " + getThreadName());
   }
 
   default void setContextSwitchRet(Consumer<Object> retSaver, Object ret) {

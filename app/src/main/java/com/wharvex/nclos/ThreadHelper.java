@@ -21,11 +21,7 @@ public class ThreadHelper {
     Thread.getAllStackTraces()
         .keySet()
         .forEach(
-            t ->
-                OutputHelper.getInstance().getDebugLogger().info(
-                    "Thread: " + t.getName() + "\nState: " + t.getState() +
-                        "\nStack trace: " +
-                        Arrays.toString(t.getStackTrace())));
+            t -> NclosLogger.logDebug(t.getName() + ", " + t.getState()));
   }
 
   public static void threadSleep(long millis) {
