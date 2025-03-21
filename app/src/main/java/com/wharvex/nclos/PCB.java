@@ -191,4 +191,9 @@ public class PCB {
   public void setMessages(List<KernelMessage> messages) {
     this.messages = messages;
   }
+
+  @Override
+  public String toString() {
+    return getThreadName();
+  }
 }

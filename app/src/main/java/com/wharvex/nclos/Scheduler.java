@@ -79,15 +79,8 @@ public class Scheduler {
   }
 
   public PCB getCurrentlyRunningSafe() {
-    return preGetCurrentlyRunning()
-        .orElseThrow(
-            () ->
-                new RuntimeException(
-                    OutputHelper.getInstance()
-                        .logToAllAndReturnMessage(
-                            "Expected Scheduler.currentlyRunning to not" +
-                                " be null",
-                            Level.SEVERE)));
+    return preGetCurrentlyRunning().orElseThrow(() -> new RuntimeException(
+        NclosLogger.logError("sched.currun was null").get()));
   }
 
   private List<KernelMessage> getWaitingMessagesForPCB(PCB pcb) {
@@ -101,15 +94,13 @@ public class Scheduler {
         getWaitingRecipients().stream()
             .filter(pcb -> !getWaitingMessagesForPCB(pcb).isEmpty())
             .toList();
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Initial contents of doneWaiters: " + doneWaiters);
+    NclosLogger.logDebug("Initial contents of doneWaiters: " + doneWaiters);
 
     // Remove from waitingRecipients the message-waiters who have messages
     // now.
     getWaitingRecipients().removeAll(doneWaiters);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Contents of waitingRecipients after removing doneWaiters: " +
-            getWaitingRecipients());
+    NclosLogger.logDebug("Contents of waitingRecipients after removing " +
+        "doneWaiters: " + getWaitingRecipients());
 
     // Add each doneWaiter's messages to its PCB.
     doneWaiters =
@@ -117,11 +108,9 @@ public class Scheduler {
             .map(pcb -> pcb.addAllToMessagesAndReturnThis(
                 getWaitingMessagesForPCB(pcb)))
             .toList();
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Contents of doneWaiters after adding messages to them:");
-    doneWaiters.forEach(
-        dw -> OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-            dw.getThreadName() + " -- " + dw.getMessages()));
+    NclosLogger.logDebug(
+        "Contents of doneWaiters after adding messages to them: " +
+            doneWaiters);
 
     // Add all the doneWaiters to the waiting (readyToRun) queue.
     getWQ().addAll(doneWaiters);
@@ -130,9 +119,7 @@ public class Scheduler {
     // now doneWaiters.
     doneWaiters.forEach(
         dw -> getWaitingMessages().removeAll(getWaitingMessagesForPCB(dw)));
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Contents of waitingMessages after removing doneWaiters: " +
-            getWaitingMessages());
+    NclosLogger.logDebug("waitingMessages -> " + getWaitingMessages());
   }
 
   public void switchProcess(Supplier<PCB> processChooser) {
@@ -160,14 +147,11 @@ public class Scheduler {
         preGetCurrentlyRunning()
             .orElse(getFromPcbByPidComplete(
                 getPidByName(OS.getContextSwitcher().getThreadName())));
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "oldCurRun is " + oldCurRun.getThreadName());
+    NclosLogger.logDebug("oldCurRun is " + oldCurRun.getThreadName());
 
     // Mark oldCurRun for stopping based on whether chosenProcess ref-equals
     // oldCurRun.
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "If the chosen process doesn't equal the old curRun, " +
-            "the old curRun should stop after the context switch");
+    NclosLogger.logDebug("setting shouldStopAfterContextSwitch");
     oldCurRun.getUserlandProcess()
         .setShouldStopAfterContextSwitch(chosenProcess != oldCurRun);
 
@@ -176,61 +160,40 @@ public class Scheduler {
   }
 
   public synchronized Optional<PCB> getCurrentlyRunning() {
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Entered synchronized method to get Scheduler.currentlyRunning\n" +
-            "Scheduler.currentlyRunning is " +
-            (currentlyRunning != null ? currentlyRunning.getThreadName() :
-                "null"));
+    NclosLogger.logDebugSync(ExecutionPathStage.IN, currentlyRunning);
     return Optional.ofNullable(currentlyRunning);
   }
 
   public synchronized void setCurrentlyRunning(PCB currentlyRunning) {
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Entered synchronized method to set Scheduler.currentlyRunning\n" +
-            "Setting Scheduler.currentlyRunning to " +
-            (currentlyRunning != null ? currentlyRunning.getThreadName() :
-                "null"));
+    NclosLogger.logDebugSync(ExecutionPathStage.IN, currentlyRunning);
     this.currentlyRunning = currentlyRunning;
   }
 
   public Optional<PCB> preGetCurrentlyRunning() {
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Before calling getCurrentlyRunning");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     var ret = getCurrentlyRunning();
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "After returning from getCurrentlyRunning");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
     return ret;
   }
 
   public void preSetCurrentlyRunning(PCB currentlyRunning) {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Before calling setCurrentlyRunning");
+    NclosLogger.logDebugSync(ExecutionPathStage.BEFORE_ENTER);
     setCurrentlyRunning(currentlyRunning);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "After returning from setCurrentlyRunning");
+    NclosLogger.logDebugSync(ExecutionPathStage.AFTER_EXIT);
   }
 
   public void addToWQ(PCB pcb) {
     getWQ().add(pcb);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Added " + pcb.getThreadName() + "to waiting queue\n" +
-            "Contents of waiting queue:");
-    getWQ().forEach(wqElm ->
-        OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-            wqElm.getThreadName()));
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Size of waiting queue: " + getWQ().size());
+    NclosLogger.logDebug("Added " + pcb.getThreadName() + " to wq");
+    getWQ().forEach(NclosLogger::logDebug);
+    NclosLogger.logDebug("Size of wq: " + getWQ().size());
   }
 
   private void removeFromWQ(int idx) {
     PCB removed = getWQ().remove(idx);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "Removed " + removed.getThreadName() + " from waiting queue\n" +
-            "Contents of waiting queue:");
-    getWQ().forEach(
-        wqElm -> OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-            wqElm.getThreadName()));
-
+    NclosLogger.logDebug("Removed " + removed.getThreadName() + " from wq");
+    getWQ().forEach(NclosLogger::logDebug);
+    NclosLogger.logDebug("Size of wq: " + getWQ().size());
   }
 
   private List<PCB> getWQ() {
@@ -245,9 +208,7 @@ public class Scheduler {
     Random r = new Random();
     int chosenIdx = r.nextInt(getWQ().size());
     PCB chosenProcess = getFromWQ(chosenIdx);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-        "The chosen process to switch to is " +
-            chosenProcess.getThreadName());
+    NclosLogger.logDebug("chos process -> " + chosenProcess.getThreadName());
     removeFromWQ(chosenIdx);
     return chosenProcess;
   }
@@ -256,10 +217,9 @@ public class Scheduler {
     return getPcbByPidComplete().entrySet().stream()
         .filter(e -> e.getValue().getThreadName().equals(name))
         .findFirst()
-        .orElseThrow(() -> new RuntimeException(OutputHelper.getInstance()
-            .logToAllAndReturnMessage(
-                "Scheduler.getPidByName: No such thread name: " + name,
-                Level.SEVERE))).getKey();
+        .orElseThrow(() -> new RuntimeException(
+            NclosLogger.logError("no such thread name -> " + name).get()))
+        .getKey();
   }
 
   public int getPid() {
@@ -267,14 +227,12 @@ public class Scheduler {
   }
 
   public void startTimer() {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(Level.INFO, "Scheduling Timer...");
+    NclosLogger.logDebug("Scheduling Timer...");
     timer.schedule(
         new TimerTask() {
           @Override
           public void run() {
-            OutputHelper.getInstance().getDebugLogger()
-                .log(Level.INFO, "Timer says: I'm starting...");
+            NclosLogger.logDebugThread(ThreadLifeStage.STARTING);
             preGetCurrentlyRunning()
                 .ifPresentOrElse(
                     // TODO: What happens if the currentlyRunning changes
@@ -285,18 +243,7 @@ public class Scheduler {
                     // Timer from its waiting loop.
                     PCB::stop,
                     () ->
-                        OutputHelper.getInstance().getDebugLogger()
-                            .log(Level.INFO,
-                                "Timer says: Found null currentlyRunning\n" +
-                                    "Bootloader is " +
-                                    ThreadHelper.getThreadStateString(
-                                        "bootloaderThread") +
-                                    "Main is " +
-                                    ThreadHelper.getThreadStateString(
-                                        "mainThread") +
-                                    "Kernel is " +
-                                    ThreadHelper.getThreadStateString(
-                                        "kernelThread")));
+                        NclosLogger.logDebug("currun is null"));
           }
         },
         1000,
@@ -313,16 +260,10 @@ public class Scheduler {
 
   public void addToPcbByPidComplete(PCB pcb, int pid) {
     getPcbByPidComplete().put(pid, pcb);
-    OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
+    NclosLogger.logDebug(
         "Added " + pcb.getThreadName() + " to pcbByPidComplete");
-    getPcbByPidComplete()
-        .forEach(
-            (key, value) ->
-                OutputHelper.getInstance().getDebugLogger().log(Level.INFO,
-                    "Contents of pcbByPidComplete -- Key "
-                        + key
-                        + "; Value "
-                        + value.getThreadName()));
+    getPcbByPidComplete().forEach(
+        (key, value) -> NclosLogger.logDebug(key + ", " + value));
   }
 
   public ArrayList<KernelMessage> getWaitingMessages() {
@@ -334,26 +275,16 @@ public class Scheduler {
   }
 
   public void addToWaitingMessages(KernelMessage km) {
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO, "Adding " + km + " to waitingMessages");
+    NclosLogger.logDebug("Adding " + km + " to waitingMessages");
     getWaitingMessages().add(km);
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO,
-            "Contents of waitingMessages: " + getWaitingMessages());
+    NclosLogger.logDebug("waitingMessages -> " + getWaitingMessages());
   }
 
   public void addToWaitingRecipients(PCB pcb) {
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO,
-            "Adding " + pcb.getThreadName() + " to waitingRecipients");
+    NclosLogger.logDebug("Adding " + pcb.getThreadName() + " to " +
+        "waitingRecipients");
     getWaitingRecipients().add(pcb);
-    OutputHelper.getInstance()
-        .getDebugLogger()
-        .log(Level.INFO,
-            "Contents of waitingRecipients: " + getWaitingRecipients());
+    NclosLogger.logDebug("waitingRecipients -> " + getWaitingRecipients());
   }
 
   public PCB getFromWaitingRecipients(int idx) {
