@@ -29,6 +29,8 @@ public class SwingWindowHelperSingleton {
     textArea.setFont(new Font("Courier New", Font.PLAIN, 16));
     textArea.setBackground(new Color(0x141414));
     textArea.setForeground(Color.LIGHT_GRAY);
+    textArea.setLineWrap(true);
+    textArea.setWrapStyleWord(true);
 
     frame.add(new JScrollPane(textArea), BorderLayout.CENTER);
     frame.setSize(400, 400);

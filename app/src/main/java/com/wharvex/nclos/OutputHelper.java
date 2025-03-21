@@ -27,7 +27,7 @@ public class OutputHelper {
     var mainOutputLoggerStreamHandler =
         new StreamHandler(
             new OutputStreamExt(mainOutputLogFrame.getTextArea()),
-            new SimpleFormatter());
+            new SimpleFormatterExt());
     mainOutputLogger.addHandler(mainOutputLoggerStreamHandler);
 
     // Show the log window.

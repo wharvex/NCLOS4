@@ -65,6 +65,7 @@ public class FakeFileSystem implements Device {
   public void seek(int id, int to) {
   }
 
+  // todo: handle the case where getFromFiles(id) returns null.
   @Override
   public int write(int id, byte[] data) {
     try {
