@@ -35,9 +35,12 @@ public class OutputHelper {
 
     // Configure loggers to print to their respective log files.
     try {
-      mainOutputLogger.addHandler(
-          new FileHandler(mainOutputLogFilePath));
-      debugLogger.addHandler(new FileHandler(debugLogFilePath));
+      var mainFileHandler = new FileHandler(mainOutputLogFilePath);
+      var debugFileHandler = new FileHandler(debugLogFilePath);
+      mainFileHandler.setFormatter(new XMLFormatterExt());
+      debugFileHandler.setFormatter(new XMLFormatterExt());
+      mainOutputLogger.addHandler(mainFileHandler);
+      debugLogger.addHandler(debugFileHandler);
     } catch (IOException e) {
       System.out.println("Failed to create log files -- exiting");
       System.exit(-1);

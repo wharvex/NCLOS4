@@ -7,12 +7,12 @@ import java.util.logging.LogRecord;
 import java.util.stream.Stream;
 
 public class NclosLogger {
-  private static final String messageBase =
-      "THREAD:{0};PREV_FRAME.CLASS:{1};PREV_FRAME.METHOD:{2};";
-  private static final String noteExtension = "NOTE:{3};";
-  private static final String noteExtension2 = "NOTE:{4};";
-  private static final String syncExtension = "SYNC_STAGE:{3};";
-  private static final String threadExtension = "THREAD_STAGE:{3};";
+  //  private static final String messageBase =
+//      "THREAD:{0};PREV_FRAME.CLASS:{1};PREV_FRAME.METHOD:{2};";
+  private static final String noteExtension = "NOTE:{0};";
+  private static final String noteExtension2 = "NOTE:{1};";
+  private static final String syncExtension = "SYNC_STAGE:{0};";
+  private static final String threadExtension = "THREAD_STAGE:{0};";
   private static final String syncWithNoteExtension = syncExtension +
       noteExtension2;
   private static final String threadWithNoteExtension = threadExtension +
@@ -21,7 +21,7 @@ public class NclosLogger {
   private static LogRecord getLogRecord(Level level, String message,
                                         Object... params) {
     // Create the record, get the frames.
-    var ret = new LogRecord(level, messageBase + message);
+    var ret = new LogRecordExt(level, message);
     var frames = new TwoStackFrameWrappers(5, 6);
 
     // Set the record's stack "source" with data from the first frame.
@@ -29,16 +29,20 @@ public class NclosLogger {
     ret.setSourceMethodName(frames.getFirstMethodName());
 
     // The first three parameters to every log message.
-    var baseParams = new Object[]{Thread.currentThread().getName(),
-        frames.getSecondClassName(),
-        frames.getSecondMethodName()};
+//    var baseParams = new Object[]{Thread.currentThread().getName(),
+//        frames.getSecondClassName(),
+//        frames.getSecondMethodName()};
+    ret.setThreadName(Thread.currentThread().getName());
+    ret.setPrevClass(frames.getSecondClassName());
+    ret.setPrevMethod(frames.getSecondMethodName());
+
 
     // Merge the parameters.
-    Object[] mergedParams =
-        Stream.of(baseParams, params).flatMap(Stream::of).toArray();
+//    Object[] mergedParams =
+//        Stream.of(baseParams, params).flatMap(Stream::of).toArray();
 
     // Set the merged parameters and return.
-    ret.setParameters(mergedParams);
+    ret.setParameters(params);
     return ret;
   }
 
