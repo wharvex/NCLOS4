@@ -36,7 +36,6 @@ public class NclosLogger {
     ret.setPrevClass(frames.getSecondClassName());
     ret.setPrevMethod(frames.getSecondMethodName());
 
-
     // Merge the parameters.
 //    Object[] mergedParams =
 //        Stream.of(baseParams, params).flatMap(Stream::of).toArray();
@@ -48,24 +47,28 @@ public class NclosLogger {
 
   public static void logDebug(Object noteParam) {
     validateNoteParam(noteParam);
-    OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, noteExtension, noteParam));
+    var record = getLogRecord(Level.INFO, noteExtension, noteParam);
+    record.setLoggerName("DebugLog");
+    OutputHelper.getInstance().getDebugLogger().log(record);
   }
 
   public static void logDebug() {
-    OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, ""));
+    var record = getLogRecord(Level.INFO, "");
+    record.setLoggerName("DebugLog");
+    OutputHelper.getInstance().getDebugLogger().log(record);
   }
 
   public static void logMain(Object noteParam) {
     validateNoteParam(noteParam);
-    OutputHelper.getInstance().getMainOutputLogger()
-        .log(getLogRecord(Level.INFO, noteExtension, noteParam));
-    OutputHelper.getInstance().getDebugLogger()
-        .log(getLogRecord(Level.INFO, noteExtension, noteParam));
+    var record = getLogRecord(Level.INFO, noteExtension, noteParam);
+    record.setLoggerName("MainOutputLog");
+    OutputHelper.getInstance().getMainOutputLogger().log(record);
+    OutputHelper.getInstance().getDebugLogger().log(record);
   }
 
   public static void logDebugSync(ExecutionPathStage stage) {
+    var record = getLogRecord(Level.INFO, syncExtension, stage);
+    record.setLoggerName("DebugLog");
     OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
         syncExtension, stage));
   }
@@ -73,26 +76,32 @@ public class NclosLogger {
   public static void logDebugSync(ExecutionPathStage stage,
                                   Object noteParam) {
     validateNoteParam(noteParam);
-    OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        syncWithNoteExtension, stage, noteParam));
+    var record = getLogRecord(Level.INFO, syncWithNoteExtension, stage,
+        noteParam);
+    record.setLoggerName("DebugLog");
+    OutputHelper.getInstance().getDebugLogger().log(record);
   }
 
   public static void logDebugThread(ThreadLifeStage stage) {
-    OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        threadExtension, stage));
+    var record = getLogRecord(Level.INFO, threadExtension, stage);
+    record.setLoggerName("DebugLog");
+    OutputHelper.getInstance().getDebugLogger().log(record);
   }
 
   public static void logDebugThread(ThreadLifeStage stage,
                                     Object noteParam) {
     validateNoteParam(noteParam);
-    OutputHelper.getInstance().getDebugLogger().log(getLogRecord(Level.INFO,
-        threadWithNoteExtension, stage, noteParam));
+    var record = getLogRecord(Level.INFO, threadWithNoteExtension, stage,
+        noteParam);
+    record.setLoggerName("DebugLog");
+    OutputHelper.getInstance().getDebugLogger().log(record);
   }
 
   public static Supplier<String> logError(Object noteParam) {
     validateNoteParam(noteParam);
     return () -> {
       var record = getLogRecord(Level.SEVERE, noteExtension, noteParam);
+      record.setLoggerName("MainOutputLog");
       OutputHelper.getInstance().getDebugLogger().log(record);
       OutputHelper.getInstance().getMainOutputLogger().log(record);
       return MessageFormat.format(record.getMessage(),

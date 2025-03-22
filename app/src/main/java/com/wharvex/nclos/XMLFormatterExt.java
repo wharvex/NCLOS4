@@ -7,7 +7,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.XMLFormatter;
 
 public class XMLFormatterExt extends XMLFormatter {
-
   @Override
   public String format(LogRecord record) {
     StringBuilder sb = new StringBuilder(500);
